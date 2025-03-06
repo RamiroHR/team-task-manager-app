@@ -1,0 +1,2 @@
+# ignore file to manage credentials & sensitive data
+.env
