@@ -1,2 +1,2 @@
 # team-task-manager-app
-Application de gestion de tareas para equipos remotos
+App de gestion de tareas para equipos remotos.
