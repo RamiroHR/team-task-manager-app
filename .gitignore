@@ -1,2 +1,7 @@
 # ignore file to manage credentials & sensitive data
 .env
+
+# ignore node modules
+node_modules
+backend/node_modules
+frontend/node_modules
