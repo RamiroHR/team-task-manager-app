@@ -7,14 +7,14 @@ root = true
 [*]
 indent_style = space
 indent_size = 4
-end_of_line = lf                 # if working in windwos configure git settings
+end_of_line = lf                 # if working in windows configure git settings
 charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
 
 # Special settings for JavaScript, TypeScript, and JSON
-[*.js]
+[*.{js,jsx}]
 indent_size = 2
 
 # Special settings for Markdown (keep trailing spaces for formatting)
