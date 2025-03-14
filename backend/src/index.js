@@ -1,34 +1,66 @@
-const express = require('express');
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
+
+import express from 'express'
 const app = express();
-
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-
 app.use(express.json());
 
 const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-// Temporary simple GET endopint to test express server
-app.get('/api/tasks_hardcoded', (req, res) => {
-
-  // hard coded list of example tasks
-  const tasks = [
-    {id: 1, title: 'Setup git repository', completed: true},
-    {id: 2, title: 'Install git flow', completed: true},
-    {id: 3, title: 'Build basic backend', completed: true},
-    {id: 4, title: 'Build basic frontend', completed: true},
-    {id: 5, title: 'Test integration', completed: true},
-    {id: 6, title: 'Build basic frontend', completed: true},
-    {id: 7, title: 'Expand features and Functionalities', completed: false},
-  ];
-
-  //return list of task
-  res.json(tasks);
-});
+app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
 
 
-app.get('/api/tasks_db', async (req, res) => {
+// GET ALL TASKS
+app.get('/api/tasks', async (req, res) => {
   const tasks = await prisma.task.findMany();
   res.json(tasks);
 });
+
+
+// GET A TASK BY id
+app.get('/api/task/:id', async (req, res) => {
+  const { id } = req.params;
+
+  const retrievedTask = await prisma.task.findUnique({
+    where: { id: Number(id) },
+  });
+
+  res.json(retrievedTask)
+})
+
+
+// DELETE A TASK BY id
+app.delete('/api/task/delete/:id', async (req, res) => {
+  const { id } = req.params;
+
+  const deletedTask = await prisma.task.delete({
+    where: { id: Number(id) },
+  });
+
+  res.json(deletedTask)
+})
+
+
+// ADD A NEW TASK
+app.post('/api/task/new', async (req, res) => {
+  const { title } = req.body;
+
+  const newTask = await prisma.task.create({
+    data: { title, }
+  });
+
+  res.json(newTask)
+})
+
+
+// EDIT A TASK BY id
+app.put('/api/task/edit/:id', async (req, res) => {
+  const { id } = req.params;
+  const { title, completed } = req.body;
+
+  const updatedTask = await prisma.task.update({
+    where: {id: Number(id) },
+    data: { title, completed },
+  });
+
+  res.json(updatedTask)
+})
