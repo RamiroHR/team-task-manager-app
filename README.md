@@ -63,7 +63,7 @@ Users can:
 
 4. Start the frontend server:
    ```
-   npm start
+   npm run dev
    ```
    The frontend will run at `http://localhost:5173`.
 
@@ -74,4 +74,37 @@ Users can:
 2. Open the frontend in the browser (`http://localhost:5173`).
 3. Verify the frontend can fetch data from the backend.
 
----
+
+
+## **Testing API endpoints**
+While frontend is in development, the backend api endpoints can be tested with CURL:
+
+**Get all tasks**
+```
+curl  http://localhost:5000/api/tasks 
+```
+
+**Get a tasks with id=10**
+```
+curl  http://localhost:5000/api/task/10 
+```
+
+**Create a new task**
+```
+curl -X POST http://localhost:5000/api/task/new \
+-H "Content-Type: application/json" \
+-d '{"title": "My New Task"}'
+```
+
+**Get a tasks with id=8**
+```
+$ curl -X DELETE http://localhost:5000/api/task/delete/8
+```
+
+**Edit tasks with id=15**
+```
+curl -X PUT http://localhost:5000/api/task/edit/15 \
+-H "Content-Type: application/json" \
+-d '{"title": "Renamed Task", "completed": true}'
+```
+
