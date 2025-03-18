@@ -45,7 +45,8 @@ Users can:
    ```
    node src/index.js               // or the other file: src/helper_index.jsx
    ```
-   The backend will run at `http://localhost:5000`.
+   The backend will run at `http://localhost:5000`.  
+   Try the `http://localhost:5000/api/tasks` endpoint.  
 
 ---
 
