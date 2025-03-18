@@ -4,10 +4,12 @@ import TaskList from './components/TaskList';
 
 function App() {
   return (
-    <div className="container mx-auto p-4">
-      <Header />
-      <TaskList />
-    </div>
+    <>
+      <div className="container mx-auto p-4">
+        <Header />
+        <TaskList />
+      </div>
+    </>
   );
 }
 
