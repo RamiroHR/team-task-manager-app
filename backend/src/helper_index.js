@@ -1,4 +1,5 @@
-const { PrismaClient } = require('@prisma/client');
+// const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // Example: Create a task
@@ -25,3 +26,5 @@ async function getAllTasks() {
   const tasks = await getAllTasks();
   console.log('All tasks:', tasks);
 })();
+
+
