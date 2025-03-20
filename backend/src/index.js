@@ -10,12 +10,26 @@ const PORT = 5000;
 app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
 
 
-// GET ALL TASKS
+// GET TOP N MOST RECENT TASKS
 app.get('/api/tasks', async (req, res) => {
-  const tasks = await prisma.task.findMany();
+  const tasks = await prisma.task.findMany({
+    orderBy: { createdAt: 'asc'},
+    take: 10
+  });
   res.json(tasks);
 });
 
+// GET RECENT TASKS in PAGE p
+app.get('/api/tasks/page/:p', async (req, res) => {
+  const { p } = req.params;
+
+  const tasks = await prisma.task.findMany({
+    orderBy: { createdAt: 'asc'},
+    skip: (p-1)*10,
+    take: 10
+  });
+  res.json(tasks);
+});
 
 // GET A TASK BY id
 app.get('/api/task/:id', async (req, res) => {

@@ -2,6 +2,9 @@
 App de gestion de tareas para equipos remotos.  
 Full stack development.
 
+v1.1.0
+![alt text](./images/app-view.png)
+
 ## **Functionalities**
 Users can:
 - [x] See a list of taks.

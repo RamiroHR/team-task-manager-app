@@ -5,7 +5,7 @@ import TaskList from './components/TaskList';
 function App() {
   return (
     <>
-      <div className="container mx-auto p-4">
+      <div className="max-w-7xl mx-auto p-4 sm:max-w-full md:max-w-7xl">
         <Header />
         <TaskList />
       </div>
