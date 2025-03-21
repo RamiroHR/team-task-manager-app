@@ -1,0 +1,76 @@
+# Workflow Name
+name: Backend Unit Tests
+
+# Triggers
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+# workflow jobs
+jobs:
+  test:
+    runs-on: ubuntu-latest   # gitbash equivalent
+
+    #
+    defaults:
+      run:
+        working-directory: ./backend
+
+    # set up postgre DB in the VM @ github action servers
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
+
+    steps:
+        # clone the repo into the github actions VM
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+        # set up node
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22.14.0
+
+        # install backend dependencies
+      - name: Install dependencies
+        run: npm install
+
+        # create the replacement .env file  for database credentials
+      - name: Load .env.test
+        run: |
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/testdb" > .env.test
+
+        # apply migrations to setup the database
+      - name: Run Prisma Migrations
+        run: |
+          npx prisma migrate dev --name init
+          npx prisma generate
+
+        # executes unit tests
+      - name: Run Unit Tests
+        run: npm test
+
+        # upload results
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results
+          path: backend/tests/__output__ # Update if your tests generate output files elsewhere
