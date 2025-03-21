@@ -11,4 +11,4 @@ const PORT = 5000;
 const server = app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
 
  // Export app and server for testing
-module.exports = { app, server };
+module.exports = { app, server};
