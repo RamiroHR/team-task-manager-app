@@ -1,5 +1,7 @@
-import { PrismaClient } from '@prisma/client'
-import express from 'express'
+// import { PrismaClient } from '@prisma/client'
+// import express from 'express'
+const { PrismaClient } = require('@prisma/client');
+const express = require('express');
 
 const prisma = new PrismaClient()
 
@@ -7,7 +9,7 @@ const app = express();
 app.use(express.json());
 
 const PORT = 5000;
-app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
+const server = app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
 
 
 // GET TOP N MOST RECENT TASKS
@@ -79,3 +81,6 @@ app.put('/api/task/edit/:id', async (req, res) => {
 
   res.json(updatedTask)
 })
+
+
+module.exports = { app, server}; // Export app and server for testing
