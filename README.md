@@ -60,6 +60,12 @@ or manualy setup following these steps:
 ---
 
 ### **Frontend Setup**
+Automatically setup the frontend by executing from the root folder:
+   ```
+   ./frontend-setup.sh/
+   ```
+
+or manualy setup following these steps:
 1. Navigate to the frontend directory:
    ```
    cd frontend/
