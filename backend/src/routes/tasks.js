@@ -1,8 +1,13 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
 
+const authenticate = require('../middleware/authMiddleware');
+
+const prisma = new PrismaClient();
 const router = express.Router();
+
+// Apply the authenticate middleware to protect all task routes
+router.use(authenticate);
 
 // GET TOP N MOST RECENT TASKS
 router.get('/tasks', async (req, res) => {

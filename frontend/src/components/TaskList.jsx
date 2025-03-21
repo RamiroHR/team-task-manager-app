@@ -8,7 +8,12 @@ const TaskList = () => {
   const [selectedTask, setSelectedTask] = useState(null);
 
   const fetchTasks = async () => {
-    const res = await fetch(`/api/tasks/page/${page}`);
+    const token = localStorage.getItem('token');
+    const res = await fetch(`/api/tasks/page/${page}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     const data = await res.json();
     setTasks(data);
   };
@@ -18,7 +23,13 @@ const TaskList = () => {
   });
 
   const handleDelete = async (id) => {
-    await fetch(`/api/task/delete/${id}`, {method: 'DELETE'});
+    const token = localStorage.getItem('token'); // Get the token from localStorage
+    await fetch(`/api/task/delete/${id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`, // Include the token in the headers
+      }
+    });
     fetchTasks();
   }
 
@@ -32,7 +43,12 @@ const TaskList = () => {
 
   const handleNext = async (page) => {
     if (tasks.length === 10) {
-      const res = await fetch(`/api/tasks/page/${page+1}`);
+      const token = localStorage.getItem('token'); // Get the token from localStorage
+      const res = await fetch(`/api/tasks/page/${page+1}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include the token in the headers
+        },
+      });
       const data = await res.json();
       setTasks(data);
       setPage(page+1);
@@ -41,7 +57,12 @@ const TaskList = () => {
 
   const handlePrev = async (page) => {
     if (page > 1) {
-      const res = await fetch(`/api/tasks/page/${page-1}`);
+      const token = localStorage.getItem('token'); // Get the token from localStorage
+      const res = await fetch(`/api/tasks/page/${page-1}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include the token in the headers
+        },
+      });
       const data = await res.json();
       setTasks(data);
       setPage(page-1);
