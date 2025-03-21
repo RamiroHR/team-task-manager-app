@@ -1,14 +1,15 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
-import pluginN from "eslint-plugin-n";
-import pluginImport from "eslint-plugin-import";
+const globals = require("globals");
+const pluginJs = require("@eslint/js");
+const pluginN = require("eslint-plugin-n");
+const pluginImport = require("eslint-plugin-import");
+
 
 /** @type {import('eslint').Linter.Config[]} */
-export default [
+module.exports = [
   {
     files: ["**/*.js", "__tests__/**/*.js"],       // apply config to all .js files
     languageOptions: {
-      // sourceType: "module",   // instead of commonjs.
+      sourceType: "commonjs",   // instead of commonjs.
       globals: {
         ...globals.node,      // add Node global variables (module, require, etc)
         ...globals.jest,      // add Node global variables (module, require, etc)
