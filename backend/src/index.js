@@ -1,9 +1,15 @@
 const express = require('express');
+
+const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/tasks');
 
-// Setup API using router endpoints
+
+// Setup API
 const app = express();
 app.use(express.json());
+
+//Set up routes
+app.use('/api/auth', authRoutes);
 app.use('/api', taskRoutes);
 
 // Setup server
