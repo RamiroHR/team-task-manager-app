@@ -6,11 +6,12 @@ import pluginImport from "eslint-plugin-import";
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   {
-    files: ["**/*.js"],       // apply config to all .js files
+    files: ["**/*.js", "__tests__/**/*.js"],       // apply config to all .js files
     languageOptions: {
-      sourceType: "module",   // instead of commonjs.
+      // sourceType: "module",   // instead of commonjs.
       globals: {
         ...globals.node,      // add Node global variables (module, require, etc)
+        ...globals.jest,      // add Node global variables (module, require, etc)
       },
     },
     plugins: {
@@ -34,7 +35,7 @@ export default [
 
       // Import/export rules
       "import/no-unresolved": "error",                  // Ensure imports are valid
-      "import/no-extraneous-dependencies": ["error", { devDependencies: true }],     // Prevent unnecessary dependencies
+      "import/no-extraneous-dependencies": ["error", {"devDependencies": true }],    // Prevent unnecessary dependencies
       "import/order": ["error", { "newlines-between": "always" }],  // Enforce import order
       "import/extensions": ["error", "ignorePackages"], // Allow missing extensions for packages
 
