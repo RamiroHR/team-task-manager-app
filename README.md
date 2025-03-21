@@ -8,17 +8,18 @@ v1.1.0
 ## **Functionalities**
 Users can:
 - [x] See a list of taks.
-- [ ] Add new tasks.
-- [ ] Delete tasks.
+- [x] Add new tasks.
+- [x] Delete tasks.
 - [ ] Edit Existing tasks.
 
 ## **Features**
 - [ ] Authentication login/logout (JWT).
-- [ ] Local Storage - Keep tasks status between sesions.
+- [/] Local Storage - Keep tasks status between sesions.
 - [x] Uses ORM to manage database queries (Prisma).
 - [ ] Error Handling.
 - [ ] Input validations (Joi).
-- [ ] minimize rendrings (hooks)
+- [x] minimize rendrings (hooks)
+- [x] modular code
 
 ## **Setup Instructions**
 
@@ -92,7 +93,7 @@ or manualy setup following these steps:
 
 
 
-## **Testing API endpoints**
+## **Querying API endpoints**
 While frontend is in development, the backend api endpoints can be tested with CURL:
 
 **Get all tasks**
@@ -124,3 +125,11 @@ curl -X PUT http://localhost:5000/api/task/edit/15 \
 -d '{"title": "Renamed Task", "completed": true}'
 ```
 
+## **Run Unit Test locally**
+Units tests of the APi endpoint runs in a test database whos connection URL is managed by a .env.test secret file.
+Run unit test manually by executing, from the root:
+```
+npm test
+```
+
+GitHub Actions is set to also run the same unit tests.
