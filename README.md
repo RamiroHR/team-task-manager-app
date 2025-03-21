@@ -23,6 +23,12 @@ Users can:
 ## **Setup Instructions**
 
 ### **Backend Setup**
+Automatically setup the backend by executing from the root folder:
+   ```
+   ./backend-setup.sh/
+   ```
+
+or manualy setup following these steps:
 1. Navigate to the backend directory:
    ```
    cd backend/
