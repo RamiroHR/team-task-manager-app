@@ -10,7 +10,7 @@ Users can:
 - [x] See a list of taks.
 - [x] Add new tasks.
 - [x] Delete tasks.
-- [ ] Edit Existing tasks.
+- [/] Edit Existing tasks.
 
 ## **Features**
 - [ ] Authentication login/logout (JWT).
@@ -125,10 +125,12 @@ curl -X PUT http://localhost:5000/api/task/edit/15 \
 -d '{"title": "Renamed Task", "completed": true}'
 ```
 
-## **Run Unit Test locally**
-Units tests of the APi endpoint runs in a test database whos connection URL is managed by a .env.test secret file.
-Run unit test manually by executing, from the root:
+## **Unit Tests**
+Unit tests for the backend API endpoints.
+A test database is setup to run the unit test, with the connection URL is managed by a .env.test secret file.  
+The unit tests can be runned locally executing:
 ```
+cd backend
 npm test
 ```
 
