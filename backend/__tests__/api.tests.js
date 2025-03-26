@@ -14,11 +14,14 @@ const { app, server } = require('../src/index.js');
 describe('Test the api endpoints', () => {
   let taskId;
   let taskTitle;
-
+  let userName;
+  let userPass;
+  let token;
 
   // Clear the test database before runing test sequence
   beforeAll(async () => {
     await prisma.task.deleteMany();    // delete all tasks
+    await prisma.user.deleteMany();    // delete all users
   })
 
 
@@ -29,10 +32,83 @@ describe('Test the api endpoints', () => {
   });
 
 
+  // Test Sing Up /api/auth/register (create a new user in user database)
+  it('should signup a new user', async() => {
+    const response = await request(app)
+      .post('/api/auth/register')
+      .send({
+        username: 'testUser',
+        password: 'testPassword'
+      });
+
+    expect(response.statusCode).toBe(201);
+    userName = response.body.user.username;
+    userPass = 'testPassword';
+  })
+
+
+  // Test Sing Up /api/auth/register (create a new user in user database)
+  it('should NOT signup again a registered username', async() => {
+    const response = await request(app)
+      .post('/api/auth/register')
+      .send({
+        username: 'testUser',
+        password: 'testPassword2'
+      });
+
+    expect(response.statusCode).toBe(500);
+    expect(response.error).toBeDefined();
+  })
+
+
+  // Test Login /api/auth/login (with JWT token)
+  it('should login an existing user', async() => {
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send({
+        username: userName,
+        password: userPass
+      });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.token).toBeDefined();
+    token = response.body.token;
+  })
+
+
+  // Test Login /api/auth/login (with JWT token)
+  it('should NOT login if wrong username', async() => {
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send({
+        username: 'wrongUsername',
+        password: userPass
+      });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body.error).toBeDefined();
+  })
+
+
+  // Test Login /api/auth/login (with JWT token)
+  it('should NOT login if wrong password', async() => {
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send({
+        username: userName,
+        password: 'wrongPassword'
+      });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body.error).toBeDefined();
+  })
+
+
   // Test POST /api/tasks (Create a new task)
   it('should create a new task', async () => {
     const response = await request(app)
       .post('/api/task/new')
+      .set('Authorization', `Bearer ${token}`)
       .send({ title: 'New Test Task' });
 
     expect(response.statusCode).toBe(200);
@@ -46,9 +122,10 @@ describe('Test the api endpoints', () => {
 
 
   // Test GET /api/tasks (Get all tasks)
-  it('should get a non empty list', async () => {
+  it('should get a non task empty list', async () => {
     const response = await request(app)
-      .get('/api/tasks');
+      .get('/api/tasks')
+      .set('Authorization', `Bearer ${token}`);
 
     expect(response.statusCode).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
@@ -59,7 +136,8 @@ describe('Test the api endpoints', () => {
   // Test GET /api/task/:id (Get a single task by ID)
   it('should get a single task by ID', async () => {
     const response = await request(app)
-      .get(`/api/task/${taskId}`);
+      .get(`/api/task/${taskId}`)
+      .set('Authorization', `Bearer ${token}`);
 
     expect(response.statusCode).toBe(200);
     expect(response.body.id).toBe(taskId);
@@ -73,7 +151,8 @@ describe('Test the api endpoints', () => {
     const nonExistentTaskId = 9999;
 
     const response = await request(app)
-      .get(`/api/task/${nonExistentTaskId}`);
+      .get(`/api/task/${nonExistentTaskId}`)
+      .set('Authorization', `Bearer ${token}`);
 
     expect(response.statusCode).toBe(200);   // >>>>>> change to be 404 after handdling errors
   });
@@ -83,6 +162,7 @@ describe('Test the api endpoints', () => {
   it('should update a task title', async () => {
     const response = await request(app)
       .put(`/api/task/edit/${taskId}`)
+      .set('Authorization', `Bearer ${token}`)
       .send({ title: 'Updated title' });
 
     expect(response.statusCode).toBe(200);
@@ -96,6 +176,7 @@ describe('Test the api endpoints', () => {
   it('should update a task status', async () => {
     const response = await request(app)
       .put(`/api/task/edit/${taskId}`)
+      .set('Authorization', `Bearer ${token}`)
       .send({ completed: true
       });
 
@@ -107,17 +188,19 @@ describe('Test the api endpoints', () => {
 
 
   // Test PUT /api/task/edit/:id (Verify that UPDATED DATE updates correctly)
-  it('should update a task updatedDate', async () => {
+  it('should update a task updatedDate properly', async () => {
 
     // get previus update date
     const initialTask = await request(app)
-      .get(`/api/task/${taskId}`);
+      .get(`/api/task/${taskId}`)
+      .set('Authorization', `Bearer ${token}`);
 
     const initialUpdatedDate = new Date(initialTask.body.updatedAt);
 
     // update task
     const response = await request(app)
       .put(`/api/task/edit/${taskId}`)
+      .set('Authorization', `Bearer ${token}`)
       .send({ title: 'Re-updated title',
               completed: false
       });
@@ -130,7 +213,8 @@ describe('Test the api endpoints', () => {
 
     // fetch again the task
     const updatedTask = await request(app)
-      .get(`/api/task/${taskId}`);
+      .get(`/api/task/${taskId}`)
+      .set('Authorization', `Bearer ${token}`);
 
     const newUpdatedDate = new Date(updatedTask.body.updatedAt);
 
@@ -142,13 +226,15 @@ describe('Test the api endpoints', () => {
   // test DELETE /api/task/delete/:id (Delete a task by ID)
   it('should delete a task', async () => {
     const response = await request(app)
-      .delete(`/api/task/delete/${taskId}`);
+      .delete(`/api/task/delete/${taskId}`)
+      .set('Authorization', `Bearer ${token}`);
 
     expect(response.statusCode).toBe(200);    // query successful
 
     // verify it is deleted
     const verification = await request(app)
-      .get(`/api/task/${taskId}`);
+      .get(`/api/task/${taskId}`)
+      .set('Authorization', `Bearer ${token}`);
 
     expect(verification.statusCode).toBe(200);  // >>>>>> change to be 404 after handdling errors
   })
