@@ -36,6 +36,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
+      JWT_SECRET: my-secret-jwt-key
 
     steps:
         # clone the repo into the github actions VM
