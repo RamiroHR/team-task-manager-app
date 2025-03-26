@@ -13,8 +13,8 @@ Users can:
 - [/] Edit Existing tasks.
 
 ## **Features**
-- [ ] Authentication login/logout (JWT).
-- [/] Local Storage - Keep tasks status between sesions.
+- [x] Authentication login/logout (JWT).
+- [x] Local Storage - Keep tasks status between sesions.
 - [x] Uses ORM to manage database queries (Prisma).
 - [ ] Error Handling.
 - [ ] Input validations (Joi).
@@ -96,32 +96,50 @@ or manualy setup following these steps:
 ## **Querying API endpoints**
 While frontend is in development, the backend api endpoints can be tested with CURL:
 
+**Register a new user**
+```
+curl -X POST http://localhost:5000/api/auth/register \
+-H "Content-Type: application/json" \
+-d '{"username": "user07", "password": "pass07"}'
+```
+
+**Login an existen user**
+```
+curl -X POST http://localhost:5000/api/auth/login \
+-d '{"username": "user07", "password": "pass07"}'
+```
+Save the `<jwt_token>` token returned in the `response.body.token`  
+
+
 **Get all tasks**
 ```
 curl  http://localhost:5000/api/tasks 
 ```
 
-**Get a tasks with id=10**
+
+**Get a tasks with id=10 (protected endpoint example)**
 ```
-curl  http://localhost:5000/api/task/10 
+curl  http://localhost:5000/api/task/10 \
+-H "Authorization: Bearer <jwt_token>" 
 ```
 
 **Create a new task**
 ```
 curl -X POST http://localhost:5000/api/task/new \
--H "Content-Type: application/json" \
+-H "Authorization: Bearer <jwt_token>" \
 -d '{"title": "My New Task"}'
 ```
 
 **Get a tasks with id=8**
 ```
-$ curl -X DELETE http://localhost:5000/api/task/delete/8
+$ curl -X DELETE http://localhost:5000/api/task/delete/8 \
+-H "Authorization: Bearer <jwt_token>" 
 ```
 
 **Edit tasks with id=15**
 ```
 curl -X PUT http://localhost:5000/api/task/edit/15 \
--H "Content-Type: application/json" \
+-H "Authorization: Bearer <jwt_token>" \
 -d '{"title": "Renamed Task", "completed": true}'
 ```
 
