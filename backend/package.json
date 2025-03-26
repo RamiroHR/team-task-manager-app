@@ -1,19 +1,25 @@
 {
+  "type": "commonjs",
   "scripts": {
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test": "jest"
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",
-    "express": "^4.21.2"
+    "bcryptjs": "^3.0.2",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
+    "dotenv": "^16.4.7",
     "eslint": "^9.22.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-n": "^17.16.2",
     "globals": "^16.0.0",
-    "prisma": "^6.5.0"
-  },
-  "type": "module"
+    "jest": "^29.7.0",
+    "prisma": "^6.5.0",
+    "supertest": "^7.1.0"
+  }
 }

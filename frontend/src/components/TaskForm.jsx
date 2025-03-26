@@ -5,17 +5,23 @@ const TaskForm = ({ onTaskAdded }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // prevent the form refreshing the page
+    const token = localStorage.getItem('token'); // Get the token from localStorage
 
     // Send a POST request to the backend
-    const res = await fetch('/api/task/new', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title }),
-    });
+    if (title) {
+      const res = await fetch('/api/task/new', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // Include the token in the headers
+        },
+        body: JSON.stringify({ title }),
+      });
 
-    const data = await res.json(); // Parse the response as JSON
-    onTaskAdded(data);             // Notify the parent component to update the ui
-    setTitle('');                 // Clear the input field
+      const data = await res.json(); // Parse the response as JSON
+      onTaskAdded(data);             // Notify the parent component to update the ui
+      setTitle('');                 // Clear the input field
+    }
   };
 
   return (
