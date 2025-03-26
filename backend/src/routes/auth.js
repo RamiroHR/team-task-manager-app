@@ -22,10 +22,11 @@ router.post('/register', async (req, res) => {
       },
     });
 
-    res.status(201).json({ message: 'User registered successfully', user });
+    return res.status(201).json({ message: 'User registered successfully', user });
+
   } catch (error) {
     console.error('Error registering user:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -52,11 +53,11 @@ router.post('/login', async (req, res) => {
 
     // Generate a JWT token
     const token = generateToken(user.id);
+    return res.json({ token });
 
-    res.json({ token });
   } catch (error) {
     console.error('Error logging in:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 

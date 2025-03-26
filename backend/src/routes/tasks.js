@@ -15,7 +15,8 @@ router.get('/tasks', async (req, res) => {
     orderBy: { createdAt: 'asc' },
     take: 100,
   });
-  res.json(tasks);
+
+  return res.json(tasks);
 });
 
 
@@ -28,7 +29,8 @@ router.get('/tasks/page/:p', async (req, res) => {
     skip: (p-1)*10,
     take: 10
   });
-  res.json(tasks);
+
+  return res.json(tasks);
 });
 
 
@@ -40,7 +42,7 @@ router.get('/task/:id', async (req, res) => {
     where: { id: Number(id) },
   });
 
-  res.json(retrievedTask)
+  return res.json(retrievedTask)
 })
 
 
@@ -52,7 +54,7 @@ router.delete('/task/delete/:id', async (req, res) => {
     where: { id: Number(id) },
   });
 
-  res.json(deletedTask)
+  return res.json(deletedTask)
 })
 
 
@@ -64,7 +66,7 @@ router.post('/task/new', async (req, res) => {
     data: { title, }
   });
 
-  res.json(newTask)
+  return res.json(newTask)
 })
 
 
@@ -78,7 +80,7 @@ router.put('/task/edit/:id', async (req, res) => {
     data: { title, completed },
   });
 
-  res.json(updatedTask)
+  return res.json(updatedTask)
 })
 
 
