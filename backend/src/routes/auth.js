@@ -1,15 +1,23 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 
-const { generateToken, hashPassword, comparePassword } = require('../utils/jwt');
+const { generateToken, hashPassword, comparePassword } = require('../utils/jwt.js');
+const { userSchema } = require('../validator/schemas.js');
 
 const prisma = new PrismaClient();
 const router = express.Router();
 
 // Register a new user
 router.post('/register', async (req, res) => {
-  const { username, password } = req.body;
 
+  // Validate entries
+  const {error, value} = userSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  };
+  const { username, password } = value;
+
+  // Proceed if validation passes
   try {
     // Hash the password
     const hashedPassword = await hashPassword(password);
@@ -30,10 +38,18 @@ router.post('/register', async (req, res) => {
   }
 });
 
+
 // Login a user
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
 
+  // Validate entries
+  const {error, value} = userSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message});
+  };
+  const { username, password } = value;
+
+  // Proceed if validation passes
   try {
     // Find the user
     const user = await prisma.user.findUnique({
@@ -41,14 +57,14 @@ router.post('/login', async (req, res) => {
     });
 
     if (!user) {
-      return res.status(401).json({ error: 'Invalid username or password' });
+      return res.status(401).json({ error: 'Incorrect username or password' });
     }
 
     // Compare passwords
     const passwordMatch = await comparePassword(password, user.password);
 
     if (!passwordMatch) {
-      return res.status(401).json({ error: 'Invalid username or password' });
+      return res.status(401).json({ error: 'Incorrect username or password' });
     }
 
     // Generate a JWT token
