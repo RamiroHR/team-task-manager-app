@@ -1,7 +1,8 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 
-const authenticate = require('../middleware/authMiddleware');
+const authenticate = require('../middleware/authMiddleware.js');
+const { taskSchema } = require('../validator/schemas.js');
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -9,28 +10,49 @@ const router = express.Router();
 // Apply the authenticate middleware to protect all task routes
 router.use(authenticate);
 
+
 // GET TOP N MOST RECENT TASKS
 router.get('/tasks', async (req, res) => {
-  const tasks = await prisma.task.findMany({
-    orderBy: { createdAt: 'asc' },
-    take: 100,
-  });
 
-  return res.json(tasks);
+  const N = 100;
+
+  try {
+    const tasks = await prisma.task.findMany({
+      orderBy: { createdAt: 'asc' },
+      take: N,
+    });
+    return res.json(tasks);
+
+  } catch (err) {
+    console.error('Error fetching tasks:', err);
+    res.status(500).json({
+      error: 'Internal server Error',
+      message: 'Failed to tefch tasks'
+    });
+  }
 });
 
 
 // GET RECENT TASKS in PAGE p
 router.get('/tasks/page/:p', async (req, res) => {
   const { p } = req.params;
+  const pageSize = 10;
 
-  const tasks = await prisma.task.findMany({
-    orderBy: { createdAt: 'asc'},
-    skip: (p-1)*10,
-    take: 10
-  });
+  try {
+    const tasks = await prisma.task.findMany({
+      orderBy: { createdAt: 'asc'},
+      skip: (p-1)*pageSize,
+      take: pageSize
+    });
+    return res.json(tasks);
 
-  return res.json(tasks);
+  } catch (err) {
+    console.error(`Error fetching page ${p}`, err);
+    res.status(500).json({
+      error: 'Server Error',
+      message: 'Failed to fetch page'
+    })
+  }
 });
 
 
@@ -38,11 +60,28 @@ router.get('/tasks/page/:p', async (req, res) => {
 router.get('/task/:id', async (req, res) => {
   const { id } = req.params;
 
-  const retrievedTask = await prisma.task.findUnique({
-    where: { id: Number(id) },
-  });
+  try {
+    const retrievedTask = await prisma.task.findUnique({
+      where: { id: Number(id) },
+    });
 
-  return res.json(retrievedTask)
+    if (!retrievedTask) {
+      return res.status(404).json({
+        error: 'Not found',
+        message: 'Task not found'
+      })
+    }
+
+    return res.status(200).json(retrievedTask)
+
+  } catch (err) {
+    console.error(`Error fetching task:`, err)
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to fetch task'
+    })
+  }
+
 })
 
 
@@ -50,37 +89,102 @@ router.get('/task/:id', async (req, res) => {
 router.delete('/task/delete/:id', async (req, res) => {
   const { id } = req.params;
 
-  const deletedTask = await prisma.task.delete({
-    where: { id: Number(id) },
-  });
+  try {
+    const deletedTask = await prisma.task.delete({
+      where: { id: Number(id) },
+    });
+    return res.status(204).end();  //sucess but no response body
 
-  return res.json(deletedTask)
+  } catch(error) {
+    if (error.code === 'P2025') {
+      res.status(404).json({
+        error: 'Not found',
+        message: 'Task not found'
+      });
+    } else {
+      console.error('Error deleting task:', error)
+      res.status(500).json({
+        error: 'Internal Error server',
+        message: 'Failed to delete task'
+      });
+    }
+  }
 })
 
 
 // ADD A NEW TASK
 router.post('/task/new', async (req, res) => {
-  const { title } = req.body;
 
-  const newTask = await prisma.task.create({
-    data: { title, }
-  });
+  try {
+    // validation
+    const {error, value} = taskSchema.validate(req.body)
+    if (error) {
+      return res.status(400).json({
+        error: error.details[0].message,
+        message: 'Validation error.'
+      });
+    }
 
-  return res.json(newTask)
+    // proceed if validation passes
+    const { title } = value
+
+    const newTask = await prisma.task.create({
+      data: { title, }
+    });
+
+    return res.status(200).json(newTask);
+
+  } catch (error) {
+    console.error('error creating task:', error);
+    return req.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to create task'
+    })
+
+  }
+
 })
+
 
 
 // EDIT A TASK BY id
 router.put('/task/edit/:id', async (req, res) => {
-  const { id } = req.params;
-  const { title, completed } = req.body;
 
-  const updatedTask = await prisma.task.update({
-    where: {id: Number(id) },
-    data: { title, completed },
-  });
+  try {
+    // validation
+    const {error, value} = taskSchema.validate(req.body)
+    if (error) {
+      return res.status(400).json({
+        error: error.details[0].message,
+        message: 'Validation error'
+      });
+    }
 
-  return res.json(updatedTask)
+    // proceed if validation passes
+    const { id } = req.params;
+    const { title, completed } = req.body;
+
+    const updatedTask = await prisma.task.update({
+      where: {id: Number(id) },
+      data: { title, completed },
+    });
+
+    return res.json(updatedTask)
+
+  } catch (error) {
+    if (error.code === 'P2025') { // Prisma not found error
+      res.status(404).json({
+        error: 'Not found',
+        message: 'Task not found'
+      });
+    } else {
+      console.error('Error updating task:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Failed to update task'
+      });
+    }
+  }
 })
 
 
