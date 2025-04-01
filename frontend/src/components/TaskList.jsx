@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import TaskForm from "./taskForm"
-import Modal from './Modal';
+// import Modal from './Modal';
+import TaskDetails from './TaskDetails';
 
 const TaskList = () => {
   const [tasks, setTasks] = useState([]);
@@ -20,7 +21,32 @@ const TaskList = () => {
 
   useEffect(() => {
     fetchTasks();
-  });
+  }, [page]);
+
+  const handleSee = (task) => {
+    setSelectedTask(task);
+  };
+
+  const handleUpdate = async (id, updatedData) => {
+    const token = localStorage.getItem('token');
+
+    await fetch(`/api/task/edit/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(updatedData),
+    });
+
+    await fetchTasks();
+
+    setSelectedTask(prev => ({
+      ...prev,
+      ...updatedData // overwrite the previous task details
+    }));
+  };
+
 
   const handleDelete = async (id) => {
     const token = localStorage.getItem('token'); // Get the token from localStorage
@@ -33,12 +59,9 @@ const TaskList = () => {
     fetchTasks();
   }
 
-  const handleSee = (task) => {
-    setSelectedTask(task);
-  };
-
   const handleCloseModal = () => {
     setSelectedTask(null);
+    setIsEditing(false);
   };
 
   const handleNext = async (page) => {
@@ -77,9 +100,9 @@ const TaskList = () => {
         {/* Table Headers */}
         <div className="flex font-bold border-b-2 border-gray-200 pb-2 min-w-[1200px]">
           <div className="w-1/24">ID</div>
-          <div className="w-1/20">Status</div>
+          <div className="w-1/15">Status</div>
           <div className="w-4/12">Task</div>
-          <div className="w-2/12">Actions</div>
+          <div className="w-2/20">Actions</div>
           <div className="w-1/12">Created</div>
           <div className="w-1/12">Updated</div>
         </div>
@@ -92,20 +115,14 @@ const TaskList = () => {
               className="flex items-center border-b border-gray-200 py-2"
             >
               <div className="w-1/24">{task.id}</div>
-              <div className="w-1/20">{task.completed?'done':'-'}</div>
+              <div className="w-1/15">{task.completed?'done 🟢' : 'todo ⚫'}</div>
               <div className="w-4/12">{task.title.slice(0,50)}</div>
-              <div className="w-2/12 flex space-x-2">
+              <div className="w-2/20 flex space-x-2">
                 <button
                   onClick={() => handleSee(task)}
                   className="px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
                 >
                   See
-                </button>
-                <button
-                  onClick={() => handleUpdate(task.id)}
-                  className="px-2 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                >
-                  Edit
                 </button>
                 <button
                   onClick={() => handleDelete(task.id)}
@@ -121,10 +138,12 @@ const TaskList = () => {
         </ul>
 
         {/* Modal for displaying full task title & details */}
-        <Modal isOpen={!!selectedTask} onClose={handleCloseModal}>
-          <h2 className="text-xl font-bold mb-4">Task Details</h2>
-          <p className="text-gray-400">{selectedTask?.title}</p>
-        </Modal>
+        <TaskDetails
+          task={selectedTask}
+          isOpen={!!selectedTask}
+          onClose={handleCloseModal}
+          onUpdate={handleUpdate}
+        />
 
         {/* Other Pages */}
         <div className="flex justify-left gap-4">
@@ -144,6 +163,8 @@ const TaskList = () => {
       </div>
     </div>
   );
+
+
 };
 
 export default TaskList;
