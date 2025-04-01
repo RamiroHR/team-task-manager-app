@@ -11,7 +11,7 @@ const userSchema = Joi.object({
 const taskSchema = Joi.object({
   title: Joi.string().min(2).max(50).required(),
   completed: Joi.boolean()
-})
+}).strict();
 
 
 // module.exports = {userSchema}
