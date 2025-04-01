@@ -154,6 +154,7 @@ router.put('/task/edit/:id', async (req, res) => {
     // validation
     const {error, value} = taskSchema.validate(req.body)
     if (error) {
+      console.error(error)
       return res.status(400).json({
         error: error.details[0].message,
         message: 'Validation error'
