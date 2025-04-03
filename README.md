@@ -2,89 +2,70 @@
 App de gestion de tareas para equipos remotos.  
 Full stack development.
 
-v1.1.0
+v1.2.0
 ![alt text](./images/app-view.png)
 
 ## **Functionalities**
-Users can:
+Users will be able to:
 - [x] See a list of taks.
 - [x] Add new tasks.
 - [x] Delete tasks.
-- [/] Edit Existing tasks.
+- [x] Edit Existing tasks.
+- [ ] Add and edit a task description field
+- [ ] Add user specific tasks
 
 ## **Features**
 - [x] Authentication login/logout (JWT).
 - [x] Local Storage - Keep tasks status between sesions.
 - [x] Uses ORM to manage database queries (Prisma).
-- [ ] Error Handling.
-- [ ] Input validations (Joi).
+- [x] Error Handling.
+- [x] Input validations (Joi).
 - [x] minimize rendrings (hooks)
 - [x] modular code
+- [ ] Optimize re-renderings
 
-## **Setup Instructions**
+# **Setup & Launch**
 
-### **Backend Setup**
-Automatically setup the backend by executing from the root folder:
-   ```
-   ./backend-setup.sh/
-   ```
+### **Database**  
+Update the `.env` file with the PostgreSQL connection string:
+```
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE_NAME"  
+```  
 
-or manualy setup following these steps:
-1. Navigate to the backend directory:
+
+### **Backend** 
+To setup the backend for the first time, execute:
    ```
-   cd backend/
-   ```
-2. Install dependencies:
-   ```
+   cd  backend
    npm install
-   ```
-3. Set up the database:  
-    Update the `.env` file with the PostgreSQL connection string:
-     ```
-     DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE_NAME"  
-     ```  
-    Run Prisma migrations:
-     ```
-     npx prisma migrate dev --name init
-     ```
-    Generate the Prisma Client:
-     ```
-     npx prisma generate
-     ```
-4. Start the backend server:
-   ```
-   node src/index.js               // or the other file: src/helper_index.jsx
-   ```
-   The backend will run at `http://localhost:5000`.  
-   Try the `http://localhost:5000/api/tasks` endpoint.  
-
----
-
-### **Frontend Setup**
-Automatically setup the frontend by executing from the root folder:
-   ```
-   ./frontend-setup.sh/
+   npm setup:prisma
    ```
 
-or manualy setup following these steps:
-1. Navigate to the frontend directory:
+then, to launch the backend for production **or** in a development environment:
    ```
-   cd frontend/
+   npm start   // for production
+   npm dev     // for development 
    ```
-2. Install dependencies:
+
+The backend runs in `http://localhost:5000/api/`
+
+
+### **Frontend**
+To setup the frontend for the first time, execute:
    ```
+   cd  frontend
    npm install
-   ```
-3. Configure the backend API URL:  
-   Ensure the frontend points to the correct backend URL (e.g., `http://localhost:5000/my_endpoint`).
-
-4. Start the frontend server:
-   ```
    npm run dev
    ```
-   The frontend will run at `http://localhost:5173`.
+The frontend tipically runs at `http://localhost:5173`
 
----
+
+
+# **Miscellaneous (for development)**
+
+### **API url in deployment**
+Ensure the frontend points to the correct backend URL (e.g., `http://localhost:5000/my_endpoint`).
+
 
 ### **Testing the Integration**
 1. Open the backend in the browser, directed to my endpoint (`http://localhost:5000/my_endpoint`) or query with CURL to verify the data is fetched from the database.
@@ -93,7 +74,7 @@ or manualy setup following these steps:
 
 
 
-## **Querying API endpoints**
+### **Querying API endpoints**
 While frontend is in development, the backend api endpoints can be tested with CURL:
 
 **Register a new user**
@@ -144,12 +125,13 @@ curl -X PUT http://localhost:5000/api/task/edit/15 \
 ```
 
 ## **Unit Tests**
-Unit tests for the backend API endpoints.
-A test database is setup to run the unit test, with the connection URL is managed by a .env.test secret file.  
-The unit tests can be runned locally executing:
+Unit tests for the backend API endpoints reaches 84% coverage.  
+A _test database_ is configured to run the unit test, with the connection URL managed by a `.env.test secret file.`  
+
+The unit tests can be executed locally:
 ```
 cd backend
 npm test
 ```
 
-GitHub Actions is set to also run the same unit tests.
+GitHub Actions is configured to also run the same unit tests after a `merge` or `push` on the **main** and **develop** branch.

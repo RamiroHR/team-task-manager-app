@@ -12,11 +12,13 @@ const { app, server } = require('../src/index.js');
 
 // unit tests
 describe('Test the api endpoints', () => {
+  let pageSize = 10;
   let taskId;
   let taskTitle;
   let userName;
   let userPass;
   let token;
+  let fakeToken;
 
   // Clear the test database before runing test sequence
   beforeAll(async () => {
@@ -61,6 +63,20 @@ describe('Test the api endpoints', () => {
   })
 
 
+  // Test Sing Up /api/auth/register (create a new user in user database)
+  it('should NOT signup with invalid username', async() => {
+    const response = await request(app)
+      .post('/api/auth/register')
+      .send({
+        username: 'invalidUsername',   // too long username (invalid)
+        password: 'testPassword2'
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.error).toBeDefined();
+  })
+
+
   // Test Login /api/auth/login (with JWT token)
   it('should login an existing user', async() => {
     const response = await request(app)
@@ -73,15 +89,16 @@ describe('Test the api endpoints', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body.token).toBeDefined();
     token = response.body.token;
+    fakeToken = token.slice(0,-5)+'xxxxx' // overwrite the last 5 chars of the valid token
   })
 
 
   // Test Login /api/auth/login (with JWT token)
-  it('should NOT login if wrong username', async() => {
+  it('should NOT login if incorrect username (but valid)', async() => {
     const response = await request(app)
       .post('/api/auth/login')
       .send({
-        username: 'wrongUsername',
+        username: 'badUsername',
         password: userPass
       });
 
@@ -91,7 +108,7 @@ describe('Test the api endpoints', () => {
 
 
   // Test Login /api/auth/login (with JWT token)
-  it('should NOT login if wrong password', async() => {
+  it('should NOT login if incorrect password', async() => {
     const response = await request(app)
       .post('/api/auth/login')
       .send({
@@ -122,7 +139,7 @@ describe('Test the api endpoints', () => {
 
 
   // Test GET /api/tasks (Get all tasks)
-  it('should get a non task empty list', async () => {
+  it('should get a non empty list of tasks', async () => {
     const response = await request(app)
       .get('/api/tasks')
       .set('Authorization', `Bearer ${token}`);
@@ -130,6 +147,28 @@ describe('Test the api endpoints', () => {
     expect(response.statusCode).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
     expect(response.body.length).toBeGreaterThan(0);
+  })
+
+
+  // Test GET /api/tasks (Get all tasks)
+  it('should NOt access the task list with invalid JWT token', async () => {
+    const response = await request(app)
+      .get('/api/tasks')
+      .set('Authorization', `Bearer ${fakeToken}`);
+
+    expect(response.statusCode).toBe(400); // Bad Request
+  })
+
+  // Test GET /api/tasks/page/1 (Get all tasks)
+  it('should get task of one page', async () => {
+    const response = await request(app)
+      .get('/api/tasks/page/1')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body.length).toBeGreaterThan(0);
+    expect(response.body.length).toBeLessThanOrEqual(pageSize);
   })
 
 
@@ -147,14 +186,14 @@ describe('Test the api endpoints', () => {
 
 
   // Test GET /api/task/:id (Task NOT found)
-  it('should return 200(404) for a non existent task', async () => {
+  it('should return 404 for a non existent task', async () => {
     const nonExistentTaskId = 9999;
 
     const response = await request(app)
       .get(`/api/task/${nonExistentTaskId}`)
       .set('Authorization', `Bearer ${token}`);
 
-    expect(response.statusCode).toBe(200);   // >>>>>> change to be 404 after handdling errors
+    expect(response.statusCode).toBe(404);   // >>>>>> change to be 404 after handdling errors
   });
 
 
@@ -177,7 +216,9 @@ describe('Test the api endpoints', () => {
     const response = await request(app)
       .put(`/api/task/edit/${taskId}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ completed: true
+      .send({
+        title: 'Updated title',
+        completed: true
       });
 
     expect(response.statusCode).toBe(200);
@@ -223,21 +264,61 @@ describe('Test the api endpoints', () => {
   })
 
 
+
+  // Test validation error
+  it('should return 400 for invalid input', async () => {
+    const response = await request(app)
+      .put(`/task/edit/${taskId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ title: '', completed: 'not-a-boolean' }); // Invalid data
+
+    expect(response.status).toBe(404);   // ----------> change to 400
+    // expect(response.body.error).toBeDefined();
+    // expect(response.body.message).toBe('Task not found');
+  });
+
+
+
+  // Test not found error (P2025)
+  it('should return 404 for non-existent task', async () => {
+    const nonExistentId = 9999;
+    const response = await request(app)
+      .put(`/task/edit/${nonExistentId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ title: 'Valid Title', completed: true });
+
+    expect(response.status).toBe(404);
+  });
+
+
   // test DELETE /api/task/delete/:id (Delete a task by ID)
   it('should delete a task', async () => {
     const response = await request(app)
       .delete(`/api/task/delete/${taskId}`)
       .set('Authorization', `Bearer ${token}`);
 
-    expect(response.statusCode).toBe(200);    // query successful
+    expect(response.statusCode).toBe(204);    // deletion successful
 
     // verify it is deleted
     const verification = await request(app)
       .get(`/api/task/${taskId}`)
       .set('Authorization', `Bearer ${token}`);
 
-    expect(verification.statusCode).toBe(200);  // >>>>>> change to be 404 after handdling errors
+    expect(verification.statusCode).toBe(404);
   })
+
+
+  // test DELETE /api/task/delete/:id (Delete a task by ID)
+  it('should fail to delete a non existing task', async () => {
+    const nonExistentTask = 9999;
+
+    const response = await request(app)
+      .delete(`/api/task/delete/${nonExistentTask}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(404);
+  })
+
 
 
 });

@@ -12,7 +12,7 @@ const authenticate = (req, res, next) => {
     req.userId = decoded.userId;
     next();
   } catch (error) {
-    return res.status(400).json({ error: 'Invalid token.' });
+    return res.status(400).json({ error: 'Invalid token.' });   // e.g.: if token is expired
   }
 };
 
