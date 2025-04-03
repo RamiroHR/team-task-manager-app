@@ -1,6 +1,9 @@
 {
   "type": "commonjs",
   "scripts": {
+    "setup:prisma": "npx prisma migrate dev --name init && npx prisma generate",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "jest",
@@ -21,6 +24,7 @@
     "eslint-plugin-n": "^17.16.2",
     "globals": "^16.0.0",
     "jest": "^29.7.0",
+    "nodemon": "^3.1.9",
     "prisma": "^6.5.0",
     "supertest": "^7.1.0"
   }
