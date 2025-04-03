@@ -9,15 +9,38 @@ import Register from './components/Register';
 const App = () => {
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
-
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      setIsAuthenticated(true);
-    }
+    const verifyToken = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await fetch('/api/auth/verify', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (response.ok) {
+            setIsAuthenticated(true);
+          } else {
+            localStorage.removeItem('token')
+            setIsAuthenticated(false)
+          }
+
+        } catch (error) {
+          localStorage.removeItem('token')
+          setIsAuthenticated(false)
+        }
+      } else {
+        setIsAuthenticated(false);
+      }
+    };
+
+    verifyToken();
   }, []);
+
 
   const handleLogin = () => {
     setIsAuthenticated(true);

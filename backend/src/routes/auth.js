@@ -1,6 +1,7 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 
+const authenticate = require '../middleware/authMiddleware.js'
 const { generateToken, hashPassword, comparePassword } = require('../utils/jwt.js');
 const { userSchema } = require('../validator/schemas.js');
 
@@ -76,5 +77,17 @@ router.post('/login', async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
+// verify token
+router.get('/verify', authenticate,  async (req, res) => {
+
+  // if valid token, return success
+  return res.status(200).json({
+    valid: true,
+    userId: res.userId
+  });
+});
+
 
 module.exports = router;
