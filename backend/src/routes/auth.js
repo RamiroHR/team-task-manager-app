@@ -1,7 +1,7 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 
-const authenticate = require '../middleware/authMiddleware.js'
+const authenticate = require('../middleware/authMiddleware.js');
 const { generateToken, hashPassword, comparePassword } = require('../utils/jwt.js');
 const { userSchema } = require('../validator/schemas.js');
 
@@ -85,9 +85,10 @@ router.get('/verify', authenticate,  async (req, res) => {
   // if valid token, return success
   return res.status(200).json({
     valid: true,
-    userId: res.userId
+    userId: req.userId
   });
 });
 
 
 module.exports = router;
+
