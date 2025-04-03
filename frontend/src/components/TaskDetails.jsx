@@ -4,43 +4,76 @@ import Modal from './Modal';
 const TaskDetails = ({ task, isOpen, onClose, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(task?.title || '');
+  const [editedDescription, setEditedDescription] = useState(task?.description || '');
   const [editedStatus, setEditedStatus] = useState(task?.completed || false);
-  const [error, setError] = useState('')
+  const [errorTitle, setErrorTitle] = useState('')
+  const [errorDescr, setErrorDescr] = useState('')
 
   const MAX_TITLE_LENGTH = 50;
   const MIN_TITLE_LENGTH = 2;
+  const MAX_DESCRIPTION_LENGTH = 512;
 
   useEffect(() => {
     if (task) {
       setEditedTitle(task.title);
+      setEditedDescription(task.description);
       setEditedStatus(task.completed);
     }
   }, [task]);
 
   const handleEdit = () => {
     setEditedTitle(task.title);
+    setEditedDescription(task.description);
     setEditedStatus(task.completed);
     setIsEditing(true);
   };
 
-  const handleSave = async () => {
+  // Validate title
+  const validateTitle = () => {
+    let hasTitleError = false;
     if (editedTitle.length < MIN_TITLE_LENGTH) {
-      setError(`Title must be at least ${MIN_TITLE_LENGTH} characters`);
-      return;
+      setErrorTitle(`Title must be at least ${MIN_TITLE_LENGTH} characters`);
+      hasTitleError = true;
+    } else if (editedTitle.length >= MAX_TITLE_LENGTH) {
+      setErrorTitle(`Title must be less than ${MAX_TITLE_LENGTH} characters`);
+      hasTitleError = true;
     }
-    if (editedTitle.length >= MAX_TITLE_LENGTH) {
-      setError(`Title must be less than ${MAX_TITLE_LENGTH} characters`);
+    return hasTitleError
+  }
+
+  // Validate description
+  const validateDescription = () => {
+    let hasDescriptionError = false;
+    if (editedDescription.length >= MAX_DESCRIPTION_LENGTH) {
+      setErrorDescr(`Details field must be less than ${MAX_DESCRIPTION_LENGTH} characters`);
+      hasDescriptionError = true;
+    }
+    return hasDescriptionError
+  }
+
+  // Save task details
+  const handleSave = async () => {
+
+    setErrorTitle('');
+    setErrorDescr('');
+
+    // Set error messages & stops if there is an error
+    const hasTitleError = validateTitle()
+    const hasDescriptionError = validateDescription()
+    if (hasTitleError || hasDescriptionError) {
       return;
     }
 
+    // Proceeed to save edits if no error
     await onUpdate(task.id, {
       title: editedTitle,
+      description: editedDescription,
       completed: editedStatus
     });
 
-    setError('')
     setIsEditing(false);
   };
+
 
   const handleClose = () => {
     setIsEditing(false);
@@ -60,7 +93,7 @@ const TaskDetails = ({ task, isOpen, onClose, onUpdate }) => {
           </div>
           <div className="items-center gap-2 mb-6">
             <h2 className="text-l font-bold">Details:</h2>
-            <p className="text-gray-400">{task?.title}</p>
+            <p className="text-gray-400 break-words whitespace-pre-wrap">{task?.description}</p>
           </div>
           <div className="flex items-center gap-2 mb-2">
             <h2 className="text-l font-bold">Created:</h2>
@@ -90,7 +123,18 @@ const TaskDetails = ({ task, isOpen, onClose, onUpdate }) => {
               maxLength={MAX_TITLE_LENGTH}
               //minLength={MIN_TITLE_LENGTH}
             />
-            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+            {errorTitle && <p className="text-red-500 text-sm mt-1">{errorTitle}</p>}
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-bold mb-2">Details:</label>
+            <textarea
+              value={editedDescription}
+              onChange={(e) => setEditedDescription(e.target.value)}
+              className="w-full p-2 bg-gray-700 rounded text-white min-h-[300px] max-h-[600px]"
+              maxLength={MAX_DESCRIPTION_LENGTH}
+              row={4}
+            />
+            {errorDescr && <p className="text-red-500 text-sm mt-1">{errorDescr}</p>}
           </div>
           <div className="mb-6">
             <label className="block text-sm font-bold mb-2">Status:</label>

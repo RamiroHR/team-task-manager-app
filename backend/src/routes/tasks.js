@@ -126,10 +126,13 @@ router.post('/task/new', async (req, res) => {
     }
 
     // proceed if validation passes
-    const { title } = value
+    const { title, description } = value
 
     const newTask = await prisma.task.create({
-      data: { title, }
+      data: {
+        title,
+        description,
+      }
     });
 
     return res.status(200).json(newTask);
@@ -163,11 +166,15 @@ router.put('/task/edit/:id', async (req, res) => {
 
     // proceed if validation passes
     const { id } = req.params;
-    const { title, completed } = req.body;
+    const { title, description, completed } = req.body;
 
     const updatedTask = await prisma.task.update({
       where: {id: Number(id) },
-      data: { title, completed },
+      data: {
+        title,
+        description,
+        completed
+      },
     });
 
     return res.json(updatedTask)

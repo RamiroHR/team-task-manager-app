@@ -10,6 +10,7 @@ const userSchema = Joi.object({
 // Validation schema for user tasks
 const taskSchema = Joi.object({
   title: Joi.string().min(2).max(50).required(),
+  description: Joi.string().max(512).allow(''),
   completed: Joi.boolean()
 }).strict();
 
@@ -17,7 +18,3 @@ const taskSchema = Joi.object({
 // module.exports = {userSchema}
 module.exports = {userSchema, taskSchema}
 
-
-// // Try user-pass (it works for register)s
-// user: user032701
-// pass: pass!0327-01
