@@ -6,10 +6,18 @@ const TaskList = () => {
   const [tasks, setTasks] = useState([]);
   const [page, setPage] = useState(1);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [showDiscarded, setShowDiscarded] = useState(false);
 
   const fetchTasks = async () => {
+
     const token = localStorage.getItem('token');
-    const res = await fetch(`/api/tasks/page/${page}`, {
+
+    // select endpoint based on showDiscarded state
+    const endpoint = showDiscarded ?
+      `/api/tasks/discarded/page/${page}` :
+      `/api/tasks/page/${page}`;
+
+    const res = await fetch(endpoint, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -20,7 +28,7 @@ const TaskList = () => {
 
   useEffect(() => {
     fetchTasks();
-  }, [page]);
+  }, [page, showDiscarded]);
 
   const handleSee = (task) => {
     setSelectedTask(task);
@@ -48,14 +56,25 @@ const TaskList = () => {
 
 
   const handleDelete = async (id) => {
-    const token = localStorage.getItem('token'); // Get the token from localStorage
-    await fetch(`/api/task/delete/${id}`, {
-      method: 'DELETE',
+    // confirmation message before deleting
+    if (!window.confirm('Are you sure you want to discard this task?')) {
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+
+    const response = await fetch(`/api/task/delete/${id}`, {
+      method: 'PUT',
       headers: {
-        Authorization: `Bearer ${token}`, // Include the token in the headers
+        Authorization: `Bearer ${token}`,
       }
     });
-    fetchTasks();
+
+    if (!response.ok) {
+      throw new Error('Failed to delete task');
+    }
+
+    await fetchTasks();
   }
 
   const handleCloseModal = () => {
@@ -65,10 +84,15 @@ const TaskList = () => {
 
   const handleNext = async (page) => {
     if (tasks.length === 10) {
-      const token = localStorage.getItem('token'); // Get the token from localStorage
-      const res = await fetch(`/api/tasks/page/${page+1}`, {
+      const token = localStorage.getItem('token');
+
+      const endpoint = showDiscarded ?
+        `/api/tasks/discarded/page/${page+1}` :
+        `/api/tasks/page/${page+1}`;
+
+      const res = await fetch(endpoint, {
         headers: {
-          Authorization: `Bearer ${token}`, // Include the token in the headers
+          Authorization: `Bearer ${token}`,
         },
       });
       const data = await res.json();
@@ -79,10 +103,15 @@ const TaskList = () => {
 
   const handlePrev = async (page) => {
     if (page > 1) {
-      const token = localStorage.getItem('token'); // Get the token from localStorage
-      const res = await fetch(`/api/tasks/page/${page-1}`, {
+      const token = localStorage.getItem('token');
+
+      const endpoint = showDiscarded ?
+        `/api/tasks/discarded/page/${page-1}` :
+        `/api/tasks/page/${page-1}`;
+
+      const res = await fetch(endpoint, {
         headers: {
-          Authorization: `Bearer ${token}`, // Include the token in the headers
+          Authorization: `Bearer ${token}`,
         },
       });
       const data = await res.json();
@@ -91,10 +120,28 @@ const TaskList = () => {
     }
   }
 
+  // toggle view beteew deleted and non deleted tasks
+  const toggleView = () => {
+    setShowDiscarded(!showDiscarded);
+    setPage(1);
+  };
+
+
   return (
     <div className="p-4">
 
-      <TaskForm onTaskAdded={fetchTasks} />
+      <div className="flex justify-between items-center mb-4">
+        <TaskForm onTaskAdded={fetchTasks} />
+        <div className="space-x-4">
+          <button
+            onClick={toggleView}
+            className="px-4 py-2 text-sm bg-gray-500 text-white rounded hover:bg-gray-600"
+          >
+            {showDiscarded ? 'Show Active Tasks' : 'Show Discarded Tasks'}
+          </button>
+        </div>
+      </div>
+
 
       <div className="mt-6 overflow-x-auto">
         {/* Table Headers */}
@@ -124,12 +171,14 @@ const TaskList = () => {
                 >
                   See
                 </button>
-                <button
-                  onClick={() => handleDelete(task.id)}
-                  className="px-2 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
-                >
-                  Del
-                </button>
+                {!showDiscarded && (   // desactivate button for discarded tasks
+                  <button
+                    onClick={() => handleDelete(task.id)}
+                    className="px-2 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                  >
+                    Del
+                  </button>
+                )}
               </div>
               <div className="w-24 text-center">{task.createdAt.slice(0, 10)}</div>
               <div className="w-24 text-center">{task.updatedAt.slice(0, 10)}</div>
@@ -143,6 +192,7 @@ const TaskList = () => {
           isOpen={!!selectedTask}
           onClose={handleCloseModal}
           onUpdate={handleUpdate}
+          isDiscarded={showDiscarded}
         />
 
         {/* Other Pages */}
