@@ -21,12 +21,12 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
-
 model Task {
   id            Int      @id @default(autoincrement())
   title         String   @default("New Task")
   description   String   @default("")
   completed     Boolean  @default(false)
+  discarded     Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
