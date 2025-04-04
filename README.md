@@ -12,6 +12,7 @@ Users will be able to:
 - [x] Delete tasks.
 - [x] Edit Existing tasks.
 - [x] Add and edit a task description field
+- [x] Soft delete tasks (Recycle bin)
 - [ ] Add user specific tasks
 
 ## **Features**
