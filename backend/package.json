@@ -1,5 +1,8 @@
 {
   "type": "commonjs",
+  "engines": {
+    "node": "22.14.0"
+  },
   "scripts": {
     "setup:prisma": "npx prisma migrate dev --name init && npx prisma generate",
     "start": "node src/index.js",

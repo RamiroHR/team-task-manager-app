@@ -1,7 +1,7 @@
 import React, { useState, useEffect} from 'react';
 import Modal from './Modal';
 
-const TaskDetails = ({ task, isOpen, onClose, onUpdate }) => {
+const TaskDetails = ({ task, isOpen, onClose, onUpdate, isDiscarded}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(task?.title || '');
   const [editedDescription, setEditedDescription] = useState(task?.description || '');
@@ -86,7 +86,7 @@ const TaskDetails = ({ task, isOpen, onClose, onUpdate }) => {
       {!isEditing ? (
         // View Mode
         <>
-          <h2 className="text-xl font-bold mb-4">{task?.title}</h2>
+          <h2 className="text-xl font-bold mb-4 text-blue-500 break-all whitespace-normal">{task?.title}</h2>
           <div className="flex items-center gap-2 mb-6">
             <h2 className="text-l font-bold">Status:</h2>
             <p className="text-gray-400">{task?.completed ? ' 🟢 done' : ' ⚫ todo'}</p>
@@ -103,12 +103,19 @@ const TaskDetails = ({ task, isOpen, onClose, onUpdate }) => {
             <h2 className="text-l font-bold">Updated:</h2>
             <p className="text-gray-400">{task?.updatedAt.slice(0, 10)}</p>
           </div>
-          <button
-            onClick={handleEdit}
-            className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-          >
-            Edit
-          </button>
+          {!isDiscarded && (
+            <button
+              onClick={handleEdit}
+              className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+            >
+              Edit
+            </button>
+          )}
+            {isDiscarded && (  // Show a message if task is discarded
+            <div className="text-gray-500 italic">
+              This task has been discarded and cannot be edited.
+            </div>
+          )}
         </>
       ) : (
         // Edit Mode

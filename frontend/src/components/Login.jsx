@@ -20,9 +20,9 @@ const Login = ({ onLogin }) => {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('token', data.token); // Store the token in local storage
-        onLogin(); // Notify the parent component that the user is logged in
-        navigate('/'); // Redirect to the home page
+        localStorage.setItem('token', data.token);    // Store the token in local storage
+        onLogin();                                    // Notify the parent component that the user is logged in
+        navigate('/');                                // Redirect to the home page
       } else {
         setError(data.error || 'Invalid username or password');
       }

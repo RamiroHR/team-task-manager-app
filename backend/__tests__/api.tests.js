@@ -291,15 +291,16 @@ describe('Test the api endpoints', () => {
   });
 
 
-  // test DELETE /api/task/delete/:id (Delete a task by ID)
+  // test SOFT DELETE /api/task/delete/:id (Delete a task by ID)
   it('should delete a task', async () => {
     const response = await request(app)
-      .delete(`/api/task/delete/${taskId}`)
+      .put(`/api/task/delete/${taskId}`)
       .set('Authorization', `Bearer ${token}`);
 
-    expect(response.statusCode).toBe(204);    // deletion successful
+    expect(response.statusCode).toBe(200);      // soft deletion successfull
+    expect(response.body.discarded).toBe(true)  // verify that returned task is discarded
 
-    // verify it is deleted
+    // verify it is not present in normal get request
     const verification = await request(app)
       .get(`/api/task/${taskId}`)
       .set('Authorization', `Bearer ${token}`);
@@ -313,7 +314,7 @@ describe('Test the api endpoints', () => {
     const nonExistentTask = 9999;
 
     const response = await request(app)
-      .delete(`/api/task/delete/${nonExistentTask}`)
+      .put(`/api/task/delete/${nonExistentTask}`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(response.statusCode).toBe(404);
