@@ -1,6 +1,6 @@
 import { StrictMode, useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useLocation }  from 'react-router-dom';
+// import { useLocation }  from 'react-router-dom';
 import Header from './components/Header';
 import TaskList from './components/TaskList';
 import Login from './components/Login';
@@ -8,8 +8,8 @@ import Register from './components/Register';
 
 const App = () => {
   // 1- state variables
-  const location = useLocation();
-  const isLoginPage = location.pathname === '/login';
+  // const location = useLocation();
+  // const isLoginPage = location.pathname === '/login';
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Add loading state
 
@@ -56,7 +56,7 @@ const App = () => {
   };
 
   const handleRegister = () => {
-    setIsAuthenticated(true);
+    setIsAuthenticated(false);
   };
 
   const handleLogout = () => {
@@ -83,7 +83,6 @@ const App = () => {
       <Header
         isAuthenticated={isAuthenticated}
         onLogout={handleLogout}
-        isLoginPage={isLoginPage}
       />
       <Routes>
         <Route

@@ -1,6 +1,6 @@
-export default function Header({ isAuthenticated, onLogout, isLoginPage }) {
+export default function Header({ isAuthenticated, onLogout}) {
   return (
-    <div className={`flex justify-between items-center pt-4 mb-4 ${isLoginPage? 'max-w-md mx-auto' : ''}`}>
+    <div className={`flex justify-between items-center pt-4 mb-4 ${!isAuthenticated? 'max-w-md mx-auto' : ''}`}>
       <h1 className="text-2xl font-bold">Task Manager</h1>
       {isAuthenticated && (
         <button
