@@ -11,7 +11,7 @@ Users will be able to:
 - [x] Add new tasks.
 - [x] Delete tasks.
 - [x] Edit Existing tasks.
-- [ ] Add and edit a task description field
+- [x] Add and edit a task description field
 - [ ] Add user specific tasks
 
 ## **Features**
@@ -22,7 +22,7 @@ Users will be able to:
 - [x] Input validations (Joi).
 - [x] minimize rendrings (hooks)
 - [x] modular code
-- [ ] Optimize re-renderings
+- [/] Optimize re-renderings
 
 # **Setup & Launch**
 
@@ -38,13 +38,13 @@ To setup the backend for the first time, execute:
    ```
    cd  backend
    npm install
-   npm setup:prisma
+   npm run setup:prisma
    ```
 
 then, to launch the backend for production **or** in a development environment:
    ```
-   npm start   // for production
-   npm dev     // for development 
+   npm run start   // for production
+   npm run dev     // for development 
    ```
 
 The backend runs in `http://localhost:5000/api/`
