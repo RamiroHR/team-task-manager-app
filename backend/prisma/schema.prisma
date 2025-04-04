@@ -16,7 +16,7 @@ datasource db {
 model User {
   id        Int      @id @default(autoincrement())
   username  String   @unique
-  password  String
+  password  String   // This is the hashed password + salt string
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

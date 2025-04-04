@@ -16,6 +16,7 @@ Users will be able to:
 
 ## **Features**
 - [x] Authentication login/logout (JWT).
+- [x] Uses salting passwords (security)
 - [x] Local Storage - Keep tasks status between sesions.
 - [x] Uses ORM to manage database queries (Prisma).
 - [x] Error Handling.

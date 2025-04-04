@@ -12,11 +12,11 @@ const verifyToken = (token) => {
 };
 
 const hashPassword = async (password) => {
-  return await bcrypt.hash(password, 10);
+  return await bcrypt.hash(password, 10);   //This hashes password with salt (10 rounds)
 };
 
 const comparePassword = async (password, hashedPassword) => {
-  return await bcrypt.compare(password, hashedPassword);
+  return await bcrypt.compare(password, hashedPassword);     //bcrypt manage the passwrod salting comparison.
 };
 
 module.exports = {
