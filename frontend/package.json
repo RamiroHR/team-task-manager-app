@@ -5,9 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "npm install --no-optional rollup@3.29.4",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
+  },
+  "resolutions": {
+    "rollup": "3.29.4"
   },
   "dependencies": {
     "react": "^19.0.0",
