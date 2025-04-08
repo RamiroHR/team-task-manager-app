@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  }
+}

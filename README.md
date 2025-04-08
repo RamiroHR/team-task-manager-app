@@ -126,14 +126,25 @@ curl -X PUT http://localhost:5000/api/task/edit/15 \
 -d '{"title": "Renamed Task", "completed": true}'
 ```
 
-## **Unit Tests**
-Unit tests for the backend API endpoints reaches 84% coverage.  
-A _test database_ is configured to run the unit test, with the connection URL managed by a `.env.test secret file.`  
 
-The unit tests can be executed locally:
-```
-cd backend
-npm test
-```
+## **Testing Setup**
+Unit tests for the backend API endpoints reaches 80% coverage. The tests will be performed using a _test databse_ configured in the `.env.test` file along with other test environment variables. 
 
-GitHub Actions is configured to also run the same unit tests after a `merge` or `push` on the **main** and **develop** branch.
+1. **Create a `.env.test` file** in the `backend/` directory with:
+   ```bash
+   PORT=5001
+   DATABASE_URL="your_test_db_connection_string"
+   NODE_ENV=test
+   ```
+Use `.env.test.example` as a template to create your `.env.test`.
+
+2. **Requirements**:
+   - Use a **dedicated test database** (never production data).
+   - The test DB should be empty/migrated before running tests.
+
+3. **Run tests**:
+   ```bash
+   cd backend
+   npm run test
+   ```
+GitHub Actions is configured to also run the same unit tests after a `merge` or `push` on the **main** and **develop** branches.
