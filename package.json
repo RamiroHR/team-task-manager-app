@@ -1,0 +1,6 @@
+{
+  "name": "team-task-manager-app",
+  "scripts": {
+    "postinstall": "npm install --prefix frontend && npm install --prefix backend"
+  }
+}
