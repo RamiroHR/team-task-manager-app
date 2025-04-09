@@ -1,3 +1,4 @@
+const cors = require('cors');
 const express = require('express');
 
 const authRoutes = require('./routes/auth.js');
@@ -6,6 +7,10 @@ const taskRoutes = require('./routes/tasks.js');
 
 // Setup API
 const app = express();
+app.use(cors({
+  origin: ['https://task-manager-gz1ufnupu-ramiros-projects-3a362cea.vercel.app/', 'http://localhost:5173'],
+  credentials: true
+}));
 app.use(express.json());
 
 
