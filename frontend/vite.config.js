@@ -18,6 +18,15 @@ export default defineConfig({
   // Build outputs directory
   build: {
     outDir: 'dist',
-    emptyOutDir: true
+    emptyOutDir: true,
+    // Use esbuild for all files
+    rollupOptions: {
+      external: []
+    }
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      target: 'es2020'
+    }
   }
 })
