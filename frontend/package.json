@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "npm install --no-optional rollup@3.29.4",
+    "prebuild": "npm install --omit=optional rollup@3.29.4",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
