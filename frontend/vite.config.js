@@ -13,4 +13,11 @@ export default defineConfig({
       '/api': 'http://localhost:5000', // Proxy API requests to the backend
     }
   }
+  // Base path setting to help with Vercel deployment
+  base: '/',
+  // Build outputs directory
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true
+  }
 })

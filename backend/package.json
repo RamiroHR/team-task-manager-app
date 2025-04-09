@@ -11,7 +11,7 @@
     "lint:fix": "eslint . --fix",
     "test": "cross-env NODE_ENV=test jest",
     "test:coverage": "cross-env NODE_ENV=test jest --coverage",
-    "vercel-build": "prisma --version && prisma generate && prisma migrate deploy"
+    "vercel-build": "prisma generate && prisma migrate deploy --schema=./prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",
