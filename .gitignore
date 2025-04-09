@@ -3,6 +3,7 @@
 backend/.env
 backend/.env.test
 frontend/.env
+frontend/.env.production
 
 # ignore node modules
 node_modules
