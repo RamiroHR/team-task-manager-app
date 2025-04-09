@@ -1,29 +1,15 @@
 {
-  "version": 2,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://team-task-manager-backend.onrender.com/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
   "builds": [
     {
-      "src": "backend/src/index.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "frontend/package.json",
+      "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "frontend/dist"
+        "buildCommand": "npm install --omit=optional rollup@3.29.4 && vite build"
       }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "backend/src/index.js"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/dist/$1"
     }
   ]
 }
