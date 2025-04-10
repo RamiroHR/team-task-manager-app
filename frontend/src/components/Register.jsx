@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { getApiUrl } from '../utils/api';
 
-const Register = ({ onRegister }) => {
+const Register = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -11,7 +12,7 @@ const Register = ({ onRegister }) => {
     e.preventDefault();
 
     try {
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(getApiUrl('/api/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -20,9 +21,8 @@ const Register = ({ onRegister }) => {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('token', data.token); // Store the token in local storage
-        onRegister(); // Notify the parent component that the user is registered
-        navigate('/login'); // Redirect to the home page
+        localStorage.setItem('token', data.token);    // Store the token in local storage
+        navigate('/login');                           // Redirect to the home page
       } else {
         setError(data.error || 'Registration failed');
       }
@@ -33,9 +33,10 @@ const Register = ({ onRegister }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-gray-100 shadow-md rounded-lg">
+    <div className="max-w-md mx-auto mt-10 p-6 bg-gray-300 shadow-md rounded-lg">
       <h2 className="text-2xl font-bold mb-6 text-gray-900">Register</h2>
       {error && <p className="text-red-500 mb-4">{error}</p>}
+
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="block text-gray-700">Username</label>
@@ -57,10 +58,17 @@ const Register = ({ onRegister }) => {
             required
           />
         </div>
-        <button type="submit" className="w-full p-2 bg-green-500 text-white rounded hover:bg-green-600">
+        <button type="submit" className="w-full p-2 bg-green-600 text-white rounded hover:bg-green-600">
           Register
         </button>
       </form>
+
+      <p className="mt-4 text-center text-blue-500 font-medium">
+        Back to{' '}
+        <Link to="/login" className="text-blue-500 hover:underline">
+          Login
+        </Link>
+      </p>
     </div>
   );
 };

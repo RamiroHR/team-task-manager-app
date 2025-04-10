@@ -1,17 +1,15 @@
-import { StrictMode, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useLocation }  from 'react-router-dom';
 import Header from './components/Header';
 import TaskList from './components/TaskList';
 import Login from './components/Login';
 import Register from './components/Register';
+import { getApiUrl } from './utils/api';
 
 const App = () => {
   // 1- state variables
-  const location = useLocation();
-  const isLoginPage = location.pathname === '/login';
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [isLoading, setIsLoading] = useState(true);   // Add loading state
 
 
   // 2- useEffect logic definition
@@ -23,7 +21,7 @@ const App = () => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await fetch('/api/auth/verify', {
+          const response = await fetch(getApiUrl('/api/auth/verify'), {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -55,9 +53,6 @@ const App = () => {
     setIsAuthenticated(true);
   };
 
-  const handleRegister = () => {
-    setIsAuthenticated(true);
-  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -83,7 +78,6 @@ const App = () => {
       <Header
         isAuthenticated={isAuthenticated}
         onLogout={handleLogout}
-        isLoginPage={isLoginPage}
       />
       <Routes>
         <Route
@@ -96,7 +90,7 @@ const App = () => {
         />
         <Route
           path="/register"
-          element={<Register onRegister={handleRegister} />}
+          element={<Register />}
         />
       </Routes>
     </div>

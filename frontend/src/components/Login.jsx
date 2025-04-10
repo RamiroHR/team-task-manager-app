@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { getApiUrl } from '../utils/api';
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
@@ -11,7 +12,7 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
 
     try {
-      const response = await fetch('api/auth/login', {
+      const response = await fetch(getApiUrl('/api/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -20,9 +21,9 @@ const Login = ({ onLogin }) => {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('token', data.token); // Store the token in local storage
-        onLogin(); // Notify the parent component that the user is logged in
-        navigate('/'); // Redirect to the home page
+        localStorage.setItem('token', data.token);    // Store the token in local storage
+        onLogin();                                    // Notify the parent component that the user is logged in
+        navigate('/');                                // Redirect to the home page
       } else {
         setError(data.error || 'Invalid username or password');
       }

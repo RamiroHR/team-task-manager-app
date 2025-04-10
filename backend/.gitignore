@@ -6,3 +6,6 @@ node_modules
 
 # Exclude unit tests reports
 coverage
+
+# Exclude test output artifacts
+__tests__/__output__/*
