@@ -8,7 +8,9 @@ const taskRoutes = require('./routes/tasks.js');
 // Setup API
 const app = express();
 app.use(cors({
-  origin: ['https://task-manager-gz1ufnupu-ramiros-projects-3a362cea.vercel.app', 'http://localhost:5173'],
+  origin: ['https://task-manager-ed2f3trjz-ramiros-projects-3a362cea.vercel.app', 'http://localhost:5173'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
   credentials: true
 }));
 app.use(express.json());
