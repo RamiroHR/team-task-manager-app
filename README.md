@@ -2,6 +2,8 @@
 App de gestion de tareas para equipos remotos.  
 Full stack development.
 
+Visit the app on https://task-manager-evavrv1im-ramiros-projects-3a362cea.vercel.app  
+
 v1.2.0
 ![alt text](./images/app-view.png)
 
