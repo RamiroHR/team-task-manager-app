@@ -71,7 +71,7 @@ jobs:
 
         # executes unit tests
       - name: Run Unit Tests
-        run: npm test:coverage
+        run: npm run test:coverage
 
         # upload results
       - name: Upload test results
