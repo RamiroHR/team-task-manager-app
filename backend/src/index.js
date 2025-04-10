@@ -19,7 +19,7 @@ const app = express();
 
 // Prevent CORS issues
 app.use(cors({
-  origin: ['https://task-manager-ed2f3trjz-ramiros-projects-3a362cea.vercel.app', 'http://localhost:5173'],
+  origin: [process.env.FRONTEND_URL],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
   credentials: true
