@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getApiUrl } from '../utils/api';
 
 const TaskForm = ({ onTaskAdded }) => {
   const [title, setTitle] = useState('');
@@ -10,7 +11,7 @@ const TaskForm = ({ onTaskAdded }) => {
 
     try {
       // Send a POST request to the backend
-      const res = await fetch('/api/task/new', {
+      const res = await fetch(getApiUrl('/api/task/new'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

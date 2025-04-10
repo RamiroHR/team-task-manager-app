@@ -29,9 +29,11 @@ Users will be able to:
 # **Setup & Launch**
 
 ### **Database**  
-Update the `.env` file with the PostgreSQL connection string:
+Update the `./backend/.env` file with the PostgreSQL connection string, jwt secret key and the frontend url (local or webhosted):
 ```
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE_NAME"  
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE_NAME"
+JWT_SECRET="<your-secret-key>"
+FRONTEND_URL=http://localhost:5173
 ```  
 
 
@@ -53,6 +55,9 @@ The backend runs in `http://localhost:5000/api/`
 
 
 ### **Frontend**
+Setup a `./frontend/.env.production` using the template file `./frontend/.env.production.example`.  
+Leave the `./frontend/.env.development` as it is (empty url)
+
 To setup the frontend for the first time, execute:
    ```
    cd  frontend
@@ -131,20 +136,23 @@ curl -X PUT http://localhost:5000/api/task/edit/15 \
 Unit tests for the backend API endpoints reaches 80% coverage. The tests will be performed using a _test databse_ configured in the `.env.test` file along with other test environment variables. 
 
 1. **Create a `.env.test` file** in the `backend/` directory with:
-   ```bash
-   PORT=5001
+   ```
    DATABASE_URL="your_test_db_connection_string"
+   PORT=5001
    NODE_ENV=test
+   JWT_SECRET="secret-key"
+   FRONTEND_URL=http://localhost:5173    #or web hosted frontend url
    ```
 Use `.env.test.example` as a template to create your `.env.test`.
 
 2. **Requirements**:
-   - Use a **dedicated test database** (never production data).
+   - Use a **dedicated test database** (never the production database).
    - The test DB should be empty/migrated before running tests.
 
 3. **Run tests**:
-   ```bash
+   ```
    cd backend
    npm run test
+   npm run test:coverage     # to get coverage repport in ./backend/__tests__/__output__/
    ```
 GitHub Actions is configured to also run the same unit tests after a `merge` or `push` on the **main** and **develop** branches.

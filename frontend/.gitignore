@@ -1,5 +1,6 @@
 # vite
 .vite
+.env.production
 
 # Logs
 logs

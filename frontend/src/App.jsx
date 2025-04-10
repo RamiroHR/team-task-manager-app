@@ -4,6 +4,7 @@ import Header from './components/Header';
 import TaskList from './components/TaskList';
 import Login from './components/Login';
 import Register from './components/Register';
+import { getApiUrl } from './utils/api';
 
 const App = () => {
   // 1- state variables
@@ -20,7 +21,7 @@ const App = () => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await fetch('/api/auth/verify', {
+          const response = await fetch(getApiUrl('/api/auth/verify'), {
             headers: {
               Authorization: `Bearer ${token}`,
             },

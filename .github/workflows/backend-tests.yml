@@ -37,6 +37,8 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
       JWT_SECRET: my-secret-jwt-key
+      PORT: 5001
+      NODE_ENV: test
 
     steps:
         # clone the repo into the github actions VM
@@ -56,7 +58,10 @@ jobs:
         # create the replacement .env file  for database credentials
       - name: Load .env.test
         run: |
-          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/testdb" > .env.test
+          echo "DATABASE_URL=${{ env.DATABASE_URL }}" > .env.test
+          echo "PORT=${{ env.PORT }}" > .env.test
+          echo "NODE_ENV=${{ env.NODE_ENV }}" > .env.test
+          echo "JWT_SECRET=${{ env.JWT_SECRET }}" > .env.test
 
         # apply migrations to setup the database
       - name: Run Prisma Migrations
@@ -66,7 +71,7 @@ jobs:
 
         # executes unit tests
       - name: Run Unit Tests
-        run: npm test
+        run: npm test:coverage
 
         # upload results
       - name: Upload test results
@@ -74,4 +79,4 @@ jobs:
         if: always()
         with:
           name: test-results
-          path: ./tests/__output__
+          path: ./backend/__tests__/__output__

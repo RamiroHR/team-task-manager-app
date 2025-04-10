@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import TaskForm from "./taskForm"
+import TaskForm from "./TaskForm"
 import TaskDetails from './TaskDetails';
+import { getApiUrl } from '../utils/api';
 
 const TaskList = () => {
   const [tasks, setTasks] = useState([]);
@@ -14,8 +15,8 @@ const TaskList = () => {
 
     // select endpoint based on showDiscarded state
     const endpoint = showDiscarded ?
-      `/api/tasks/discarded/page/${page}` :
-      `/api/tasks/page/${page}`;
+      getApiUrl(`/api/tasks/discarded/page/${page}`) :
+      getApiUrl(`/api/tasks/page/${page}`);
 
     const res = await fetch(endpoint, {
       headers: {
@@ -37,7 +38,7 @@ const TaskList = () => {
   const handleUpdate = async (id, updatedData) => {
     const token = localStorage.getItem('token');
 
-    await fetch(`/api/task/edit/${id}`, {
+    await fetch(getApiUrl(`/api/task/edit/${id}`), {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -63,7 +64,7 @@ const TaskList = () => {
 
     const token = localStorage.getItem('token');
 
-    const response = await fetch(`/api/task/delete/${id}`, {
+    const response = await fetch(getApiUrl(`/api/task/delete/${id}`), {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -87,8 +88,8 @@ const TaskList = () => {
       const token = localStorage.getItem('token');
 
       const endpoint = showDiscarded ?
-        `/api/tasks/discarded/page/${page+1}` :
-        `/api/tasks/page/${page+1}`;
+        getApiUrl(`/api/tasks/discarded/page/${page+1}`) :
+        getApiUrl(`/api/tasks/page/${page+1}`);
 
       const res = await fetch(endpoint, {
         headers: {
@@ -106,8 +107,8 @@ const TaskList = () => {
       const token = localStorage.getItem('token');
 
       const endpoint = showDiscarded ?
-        `/api/tasks/discarded/page/${page-1}` :
-        `/api/tasks/page/${page-1}`;
+        getApiUrl(`/api/tasks/discarded/page/${page-1}`) :
+        getApiUrl(`/api/tasks/page/${page-1}`);
 
       const res = await fetch(endpoint, {
         headers: {
