@@ -1,18 +1,30 @@
 const express = require('express');
 const cors = require('cors');
+const dotenv = require('dotenv');
 
 const authRoutes = require('./routes/auth.js');
 const taskRoutes = require('./routes/tasks.js');
 
+// Load environment variables - prioritize test config if in test environment
+if (process.env.NODE_ENV === 'test') {
+  dotenv.config({ path: './.env.test' });
+} else {
+  dotenv.config();
+}
+
 
 // Setup API
 const app = express();
+
+
+// Prevent CORS issues
 app.use(cors({
   origin: ['https://task-manager-ed2f3trjz-ramiros-projects-3a362cea.vercel.app', 'http://localhost:5173'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
   credentials: true
 }));
+
 app.use(express.json());
 
 
