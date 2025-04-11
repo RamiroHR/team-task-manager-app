@@ -3,7 +3,7 @@ import { useContext } from 'react'
 import { AuthContext } from './context/AuthContext';
 import LoadingSpinner from './components/LoadingSpinner';
 import Header from './components/Header';
-import TaskList from './components/TaskList';
+import TaskView from './components/TaskView';
 import Login from './components/Login';
 import Register from './components/Register';
 
@@ -23,7 +23,7 @@ const App = () => {
       <Routes>
         <Route
           path="/"
-          element={isAuthenticated ? <TaskList /> : <Navigate to="/login" />}
+          element={isAuthenticated ? <TaskView /> : <Navigate to="/login" />}
         />
         <Route
           path="/login"

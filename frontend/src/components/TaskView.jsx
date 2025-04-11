@@ -3,7 +3,7 @@ import TaskForm from "./TaskForm"
 import TaskDetails from './TaskDetails';
 import { getApiUrl } from '../utils/api';
 
-const TaskList = () => {
+const TaskView = () => {
   const [tasks, setTasks] = useState([]);
   const [page, setPage] = useState(1);
   const [selectedTask, setSelectedTask] = useState(null);
@@ -218,4 +218,4 @@ const TaskList = () => {
 
 };
 
-export default TaskList;
+export default TaskView;
