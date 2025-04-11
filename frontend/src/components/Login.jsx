@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext.jsx';
 import { getApiUrl } from '../utils/api';
 
-const Login = ({ onLogin }) => {
+
+export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { onLogin } = useContext(AuthContext)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -70,5 +73,3 @@ const Login = ({ onLogin }) => {
     </div>
   );
 };
-
-export default Login;
