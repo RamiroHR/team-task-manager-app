@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useContext } from 'react'
 import { AuthContext } from './context/AuthContext';
+import { TaskProvider } from './context/TaskContext';
 import LoadingSpinner from './components/LoadingSpinner';
 import Header from './components/Header';
 import TaskView from './components/TaskView';
@@ -23,7 +24,10 @@ const App = () => {
       <Routes>
         <Route
           path="/"
-          element={isAuthenticated ? <TaskView /> : <Navigate to="/login" />}
+          element={ isAuthenticated ?
+          <TaskProvider> <TaskView /> </TaskProvider>
+          :
+          <Navigate to="/login" />}
         />
         <Route
           path="/login"

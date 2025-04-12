@@ -1,7 +1,30 @@
+import { useContext } from 'react';
+import { TaskContext } from '../context/TaskContext';
 import { FaHome, FaTrash } from 'react-icons/fa';
 import PagesToolbar from './PagesToolbar.jsx'
 
-export default function Footer({toggleView, showDiscarded, handleNext, handlePrev, page}) {
+export default function Footer() {
+
+  const { tasks, page, setPage, showDiscarded, setShowDiscarded } = useContext(TaskContext)
+
+  const handleNext = async (page) => {
+    if (tasks.length === 10) {
+      setPage(page+1);
+    }
+  }
+
+  const handlePrev = async (page) => {
+    if (page > 1) {
+      setPage(page-1);
+    }
+  }
+
+  // Toggle view between "Trash Bin" (deleted tasks) and "Home" (non deleted tasks)
+  const toggleView = () => {
+    setShowDiscarded(!showDiscarded);
+    setPage(1);
+  };
+
 
   return(
     <div className="flex justify-between space-x-4 mt-6">

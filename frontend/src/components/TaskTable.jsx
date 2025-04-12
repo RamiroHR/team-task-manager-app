@@ -1,5 +1,41 @@
+import { useContext } from 'react';
+import { TaskContext } from '../context/TaskContext';
+import { getApiUrl } from '../utils/api';
 
-export default function TaskTable({tasks, handleSee, handleDelete, showDiscarded}) {
+
+export default function TaskTable() {
+
+  const {tasks, fetchTasks, setSelectedTask, showDiscarded} = useContext(TaskContext);
+
+
+  const handleSee = (task) => {
+    setSelectedTask(task);
+  };
+
+
+  const handleDelete = async (id) => {
+    // confirmation message before deleting
+    if (!window.confirm('Are you sure you want to discard this task?')) {
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+
+    const response = await fetch(getApiUrl(`/api/task/delete/${id}`), {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete task');
+    }
+
+    await fetchTasks();
+  }
+
+
   return(
     <div className="mt-6 overflow-x-auto">
 

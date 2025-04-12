@@ -1,7 +1,13 @@
-import React, { useState, useEffect} from 'react';
+import { useState, useEffect, useContext} from 'react';
+import { TaskContext } from '../context/TaskContext';
+import { getApiUrl } from '../utils/api';
 import Modal from './Modal';
 
-const TaskDetails = ({ task, isOpen, onClose, onUpdate, isDiscarded}) => {
+const TaskDetails = () => {
+
+  const { fetchTasks, selectedTask, setSelectedTask, isDiscarded } = useContext(TaskContext)
+
+  const task = selectedTask
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(task?.title || '');
   const [editedDescription, setEditedDescription] = useState(task?.description || '');
@@ -51,6 +57,27 @@ const TaskDetails = ({ task, isOpen, onClose, onUpdate, isDiscarded}) => {
     return hasDescriptionError
   }
 
+  // write update
+  const onUpdate = async (id, updatedData) => {
+    const token = localStorage.getItem('token');
+
+    await fetch(getApiUrl(`/api/task/edit/${id}`), {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(updatedData),
+    });
+
+    await fetchTasks();
+
+    setSelectedTask(prev => ({
+      ...prev,
+      ...updatedData // overwrite the previous task details
+    }));
+  };
+
   // Save task details
   const handleSave = async () => {
 
@@ -77,13 +104,15 @@ const TaskDetails = ({ task, isOpen, onClose, onUpdate, isDiscarded}) => {
 
   const handleClose = () => {
     setIsEditing(false);
-    onClose();
+    setSelectedTask(null);
   };
 
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose}>
+    <Modal onClose={handleClose}>
+
       {!isEditing ? (
+
         // View Mode
         <>
           <h2 className="text-xl font-bold mb-4 text-blue-500 break-all whitespace-normal">{task?.title}</h2>
