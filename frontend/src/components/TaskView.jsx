@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import TaskForm from "./TaskForm"
 import TaskDetails from './TaskDetails';
 import { getApiUrl } from '../utils/api';
+import TaskToolbar from './TaskToolbar';
+import TaskTable from './TaskTable';
+import Footer from './Footer';
 
 const TaskView = () => {
   const [tasks, setTasks] = useState([]);
@@ -121,7 +123,7 @@ const TaskView = () => {
     }
   }
 
-  // toggle view beteew deleted and non deleted tasks
+  // toggle view between deleted and non deleted tasks
   const toggleView = () => {
     setShowDiscarded(!showDiscarded);
     setPage(1);
@@ -131,87 +133,35 @@ const TaskView = () => {
   return (
     <div className="p-4">
 
-      <div className="flex justify-between items-center mb-4">
-        <TaskForm onTaskAdded={fetchTasks} />
-        <div className="space-x-4">
-          <button
-            onClick={toggleView}
-            className="px-4 py-2 text-sm bg-gray-500 text-white rounded hover:bg-gray-600"
-          >
-            {showDiscarded ? 'Show Active Tasks' : 'Show Discarded Tasks'}
-          </button>
-        </div>
-      </div>
+      <TaskToolbar
+        onTaskAdded={fetchTasks}
+        toggleView={toggleView}
+        showDiscarded={showDiscarded}
+      />
 
+      <TaskTable
+          tasks={tasks}
+          handleSee={handleSee}
+          handleDelete={handleDelete}
+          showDiscarded={showDiscarded}
+      />
 
-      <div className="mt-6 overflow-x-auto">
-        {/* Table Headers */}
-        <div className="flex font-bold border-b-3 border-gray-200 pb-2">
-          <div className="w-10">ID</div>
-          <div className="w-20">Status</div>
-          <div className="flex-1">Task</div>
-          <div className="w-24 text-center">Actions</div>
-          <div className="w-24 text-center">Created</div>
-          <div className="w-24 text-center">Updated</div>
-        </div>
+      <TaskDetails
+        task={selectedTask}
+        isOpen={!!selectedTask}
+        onClose={handleCloseModal}
+        onUpdate={handleUpdate}
+        isDiscarded={showDiscarded}
+      />
 
-        {/* Task List */}
-        <ul>
-          {tasks.map((task) => (
-            <li
-              key={task.id}
-              className="flex items-center border-b border-gray-200 py-2"
-            >
-              <div className="w-10">{task.id}</div>
-              <div className="w-20">{task.completed?'done 🟢' : 'todo ⚫'}</div>
-              <div className="flex-1 truncate break-all">{task.title.slice(0,50)}</div>
-              <div className="w-24 flex justify-center space-x-2">
-                <button
-                  onClick={() => handleSee(task)}
-                  className="px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  See
-                </button>
-                {!showDiscarded && (   // desactivate button for discarded tasks
-                  <button
-                    onClick={() => handleDelete(task.id)}
-                    className="px-2 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    Del
-                  </button>
-                )}
-              </div>
-              <div className="w-24 text-center">{task.createdAt.slice(0, 10)}</div>
-              <div className="w-24 text-center">{task.updatedAt.slice(0, 10)}</div>
-            </li>
-          ))}
-        </ul>
+      <Footer
+        page={page}
+        handlePrev={handlePrev}
+        handleNext={handleNext}
+        toggleView={toggleView}
+        showDiscarded={showDiscarded}
+      />
 
-        {/* Modal for displaying full task title & details */}
-        <TaskDetails
-          task={selectedTask}
-          isOpen={!!selectedTask}
-          onClose={handleCloseModal}
-          onUpdate={handleUpdate}
-          isDiscarded={showDiscarded}
-        />
-
-        {/* Other Pages */}
-        <div className="flex justify-left gap-4">
-          <button
-            className="mt-6 w-30 py-2 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
-            onClick={() => handlePrev(page)}>
-            &lt; Previous
-          </button>
-          <button
-            className="mt-6 w-30 py-2 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
-            onClick={() => handleNext(page)}
-            >
-            Next &gt;
-          </button>
-        </div>
-
-      </div>
     </div>
   );
 
