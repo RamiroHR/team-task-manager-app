@@ -1,11 +1,10 @@
-import { useContext } from 'react'
-import { TaskContext } from '../context/TaskContext';
+import { useTaskContext } from '../context/TaskContext';
 import TaskForm from "./TaskForm"
 
 
 export default function TaskToolbar() {
 
-  const { fetchTasks } = useContext(TaskContext);
+  const { fetchTasks } = useTaskContext();
 
   return(
     <div className="flex justify-between items-center mb-4">

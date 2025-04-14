@@ -1,5 +1,4 @@
-import { useContext } from 'react';
-import { TaskContext } from '../context/TaskContext';
+import { useTaskContext } from '../context/TaskContext';
 import TaskToolbar from './TaskToolbar';
 import TaskTable from './TaskTable';
 import TaskDetails from './TaskDetails';
@@ -8,7 +7,7 @@ import Footer from './Footer';
 
 const TaskView = () => {
 
-  const { selectedTask } = useContext(TaskContext)
+  const { selectedTask } = useTaskContext()
 
   return (
     <div className="p-4">
@@ -16,7 +15,7 @@ const TaskView = () => {
       {/* Add new task and filters */}
       <TaskToolbar/>
 
-      {/* Display the list of tasks or a single task overview */}
+      {/* Display either 'the list of tasks' or 'a single task details' */}
       {!selectedTask?
         <TaskTable/>
       :

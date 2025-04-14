@@ -1,9 +1,8 @@
-import { useContext } from 'react'
-import { AuthContext } from '../context/AuthContext.jsx'
+import { useAuthContext } from '../context/AuthContext.jsx'
 
 export default function Header() {
 
-  const { isAuthenticated, onLogout } = useContext(AuthContext)
+  const { isAuthenticated, onLogout } = useAuthContext();
 
   return (
     <div className={`flex justify-between items-center pt-4 mb-4 ${!isAuthenticated? 'max-w-md mx-auto' : ''}`}>

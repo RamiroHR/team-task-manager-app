@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useContext } from 'react'
-import { AuthContext } from './context/AuthContext';
-import { TaskProvider } from './context/TaskContext';
+import { useAuthContext } from './context/AuthContext';
+import TaskProvider from './context/TaskContext';
 import LoadingSpinner from './components/LoadingSpinner';
 import Header from './components/Header';
 import TaskView from './components/TaskView';
@@ -10,7 +9,7 @@ import Register from './components/Register';
 
 const App = () => {
   // State variables
-  const { isAuthenticated, isLoading } = useContext(AuthContext);
+  const { isAuthenticated, isLoading } = useAuthContext();
 
   // Don't render anything while verifying token (inside AuthContext)
   if (isLoading) {

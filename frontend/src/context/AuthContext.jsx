@@ -1,12 +1,21 @@
-import { useState, useEffect, createContext } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { getApiUrl } from '../utils/api';
 
 // create context
-export const AuthContext = createContext();
+const AuthContext = createContext();
+
+// create custom hook
+export function useAuthContext() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuthContext must be used within a AuthProvider');
+  }
+  return context;
+}
 
 
 // create context provider
-export const AuthProvider = ({children}) => {
+export default function AuthProvider({children}) {
 
   // 1- state variables
   const [isAuthenticated, setIsAuthenticated] = useState(false);

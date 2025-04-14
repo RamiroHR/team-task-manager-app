@@ -1,21 +1,35 @@
-import { createContext } from 'react';
+import { createContext, useContext } from 'react';
 import { useState, useEffect } from 'react';
 import { getApiUrl } from '../utils/api';
 
-// create context
-export const TaskContext = createContext();
+// create context (private)
+const TaskContext = createContext();
 
 
-// create provider
-export const TaskProvider = ({children}) => {
+// create custom hook (public)
+export function useTaskContext() {
+  const context = useContext(TaskContext);
+  if (!context) {
+    throw new Error('useTaskContext must be used within a TaskProvider')
+  }
+  return context;
+}
 
+
+// create context provider (public)
+export default function TaskProvider({children}) {
+
+  // List-related states
   const [tasks, setTasks] = useState([]);
   const [page, setPage] = useState(1);
-  const [selectedTask, setSelectedTask] = useState(null);
   const [showDiscarded, setShowDiscarded] = useState(false);
 
-  const fetchTasks = async () => {
+  // single task related states
+  const [selectedTask, setSelectedTask] = useState(null);
 
+
+  // List-related operations
+  const fetchTasks = async () => {
     const token = localStorage.getItem('token');
 
     // select endpoint based on showDiscarded state
@@ -32,9 +46,13 @@ export const TaskProvider = ({children}) => {
     setTasks(data);
   };
 
+
   useEffect(() => {
     fetchTasks();
   }, [page, showDiscarded]);
+
+
+  // Singe-task operations
 
 
 
@@ -49,3 +67,4 @@ export const TaskProvider = ({children}) => {
     </TaskContext.Provider>
   );
 };
+

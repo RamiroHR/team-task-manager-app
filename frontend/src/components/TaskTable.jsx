@@ -1,11 +1,10 @@
-import { useContext } from 'react';
-import { TaskContext } from '../context/TaskContext';
+import { useTaskContext } from '../context/TaskContext';
 import { getApiUrl } from '../utils/api';
 
 
 export default function TaskTable() {
 
-  const {tasks, fetchTasks, setSelectedTask, showDiscarded} = useContext(TaskContext);
+  const {tasks, fetchTasks, setSelectedTask, showDiscarded} = useTaskContext();
 
 
   const handleSee = (task) => {

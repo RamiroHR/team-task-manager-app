@@ -1,11 +1,11 @@
-import { useState, useEffect, useContext} from 'react';
-import { TaskContext } from '../context/TaskContext';
+import { useState, useEffect} from 'react';
+import { useTaskContext } from '../context/TaskContext';
 import { getApiUrl } from '../utils/api';
 import Modal from './Modal';
 
 const TaskDetails = () => {
 
-  const { fetchTasks, selectedTask, setSelectedTask, isDiscarded } = useContext(TaskContext)
+  const { fetchTasks, selectedTask, setSelectedTask, isDiscarded } = useTaskContext()
 
   const task = selectedTask
   const [isEditing, setIsEditing] = useState(false);

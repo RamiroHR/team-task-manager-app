@@ -1,11 +1,10 @@
-import { useContext } from 'react';
-import { TaskContext } from '../context/TaskContext';
+import { useTaskContext } from '../context/TaskContext';
 import { FaHome, FaTrash } from 'react-icons/fa';
 import PagesToolbar from './PagesToolbar.jsx'
 
 export default function Footer() {
 
-  const { tasks, page, setPage, showDiscarded, setShowDiscarded } = useContext(TaskContext)
+  const { tasks, page, setPage, showDiscarded, setShowDiscarded } = useTaskContext()
 
   const handleNext = async (page) => {
     if (tasks.length === 10) {
