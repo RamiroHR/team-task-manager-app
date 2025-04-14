@@ -18,12 +18,6 @@ export default function Footer() {
     }
   }
 
-  // Toggle view between "Trash Bin" (deleted tasks) and "Home" (non deleted tasks)
-  // const toggleView = () => {
-  //   setShowDiscarded(!showDiscarded);
-  //   setPage(1);
-  // };
-
 
   return(
     <div className="flex justify-between space-x-4 mt-6">
