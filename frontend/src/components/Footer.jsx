@@ -4,7 +4,7 @@ import PagesToolbar from './PagesToolbar.jsx'
 
 export default function Footer() {
 
-  const { tasks, page, setPage, showDiscarded, setShowDiscarded } = useTaskContext()
+  const { tasks, page, setPage, showDiscarded, toggleDiscardedView } = useTaskContext()
 
   const handleNext = async (page) => {
     if (tasks.length === 10) {
@@ -19,10 +19,10 @@ export default function Footer() {
   }
 
   // Toggle view between "Trash Bin" (deleted tasks) and "Home" (non deleted tasks)
-  const toggleView = () => {
-    setShowDiscarded(!showDiscarded);
-    setPage(1);
-  };
+  // const toggleView = () => {
+  //   setShowDiscarded(!showDiscarded);
+  //   setPage(1);
+  // };
 
 
   return(
@@ -38,7 +38,7 @@ export default function Footer() {
       {/* Trash button */}
       <div className="flex justify-left items-center gap-4">
         <button
-          onClick={toggleView}
+          onClick={toggleDiscardedView}
           className="px-4  h-7 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 flex items-center"
         >
           {showDiscarded ? <FaHome className="mr-2"/> : <FaTrash className="mr-2"/>}
