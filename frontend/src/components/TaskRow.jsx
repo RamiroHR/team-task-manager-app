@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function TaskRow({task, onSee, onDelete, showDiscarded}) {
+function TaskRow({task, onSee, onDelete, showDiscarded}) {
   return(
     <li
       key={task.key}
@@ -33,6 +33,7 @@ export default function TaskRow({task, onSee, onDelete, showDiscarded}) {
       <div className="w-24 text-center">{task.createdAt.slice(0, 10)}</div>
       <div className="w-24 text-center">{task.updatedAt.slice(0, 10)}</div>
     </li>
-  )
-
+  );
 }
+
+export default React.memo(TaskRow);

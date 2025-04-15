@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { useTaskContext } from '../context/TaskContext';
 import TaskRow from './TaskRow'
 
@@ -5,18 +6,18 @@ import TaskRow from './TaskRow'
 export default function TaskTable() {
   const {tasks, selectTask, showDiscarded, deleteTask} = useTaskContext();
 
-  const handleSee = (task) => {
+  const handleSee = useCallback((task) => {
     selectTask(task);
-  };
+  }, [selectTask]);
 
-  const handleDelete = async (id) => {
+  const handleDelete = useCallback(async (id) => {
     // confirmation message before deleting
     if (!window.confirm('Are you sure you want to discard this task?')) {
       return;
     }
     // proceed to delete after confirmation
     await deleteTask(id)
-  }
+  }, [deleteTask])
 
   return(
     <div className="mt-6 overflow-x-auto">
@@ -35,11 +36,11 @@ export default function TaskTable() {
       <ul>
         {tasks.map((task) => (
           <TaskRow
-          key={task.id}
-          task={task}
-          onSee={handleSee}
-          onDelete={handleDelete}
-          showDiscarded={showDiscarded}
+            key={task.id}
+            task={task}
+            onSee={handleSee}
+            onDelete={handleDelete}
+            showDiscarded={showDiscarded}
           />
         ))}
       </ul>

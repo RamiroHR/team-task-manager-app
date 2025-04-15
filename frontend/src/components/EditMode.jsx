@@ -1,15 +1,16 @@
 // "Edit" task window
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTaskContext } from '../context/TaskContext'
 
 export default function EditMode() {
 
   const { selectedTask, setIsEditing, updateTask } = useTaskContext()
-
   const task = selectedTask;
+
   const [editedTitle, setEditedTitle] = useState(task?.title || '');
   const [editedDescription, setEditedDescription] = useState(task?.description || '');
+
   const [editedStatus, setEditedStatus] = useState(task?.completed || false);
   const [errorTitle, setErrorTitle] = useState('')
   const [errorDescr, setErrorDescr] = useState('')
@@ -18,6 +19,58 @@ export default function EditMode() {
   const MIN_TITLE_LENGTH = 2;
   const MAX_DESCRIPTION_LENGTH = 512;
 
+
+  // Validate title
+  const validateTitle = useCallback((title) => {
+    if (title.length < MIN_TITLE_LENGTH) {
+      return `Title must be at least ${MIN_TITLE_LENGTH} characters`;
+    } else if (title.length >= MAX_TITLE_LENGTH) {
+      return `Title must be less than ${MAX_TITLE_LENGTH} characters`;
+    }
+    return '';
+  }, []);
+
+
+  // Validate description
+  const validateDescription = useCallback((description) => {
+    if (description.length >= MAX_DESCRIPTION_LENGTH) {
+      return `Details field must be less than ${MAX_DESCRIPTION_LENGTH} characters`;
+    }
+    return '';
+  }, []);
+
+
+  // Save task details
+  const handleSave = useCallback(async () => {
+
+    // Set error messages & stops if there is an error
+    const titleError = validateTitle(editedTitle);
+    const descriptionError = validateDescription(editedDescription);
+
+    setErrorTitle(titleError);
+    setErrorDescr(descriptionError);
+
+    if (titleError || descriptionError) {
+      return;
+    }
+
+    // If no errors, proceeed to update database, task list and selected task details
+    const updatedData = {
+      title: editedTitle,
+      description: editedDescription,
+      completed: editedStatus
+    }
+    await updateTask(task.id, updatedData)
+  }, [editedTitle, editedDescription, editedStatus, task.id, updateTask, validateTitle, validateDescription]);
+
+
+  // on Cancel button
+  const handleCancel = useCallback(() => {
+    setIsEditing(false);
+  }, [setIsEditing])
+
+
+  // reset form chan task changes
   useEffect(() => {
     if (task) {
       setEditedTitle(task.title);
@@ -26,57 +79,6 @@ export default function EditMode() {
     }
   }, [task]);
 
-  // Save task details
-  const handleSave = async () => {
-
-    setErrorTitle('');
-    setErrorDescr('');
-
-    // Set error messages & stops if there is an error
-    const hasTitleError = validateTitle()
-    const hasDescriptionError = validateDescription()
-
-    if (hasTitleError || hasDescriptionError) {
-      return;
-    }
-
-    // If no errors, proceeed to update, database, task list and selected task details
-    const updatedData = {
-      title: editedTitle,
-      description: editedDescription,
-      completed: editedStatus
-    }
-    await updateTask(task.id, updatedData)
-  };
-
-
-  // Validate title
-  const validateTitle = () => {
-    let hasTitleError = false;
-    if (editedTitle.length < MIN_TITLE_LENGTH) {
-      setErrorTitle(`Title must be at least ${MIN_TITLE_LENGTH} characters`);
-      hasTitleError = true;
-    } else if (editedTitle.length >= MAX_TITLE_LENGTH) {
-      setErrorTitle(`Title must be less than ${MAX_TITLE_LENGTH} characters`);
-      hasTitleError = true;
-    }
-    return hasTitleError
-  }
-
-  // Validate description
-  const validateDescription = () => {
-    let hasDescriptionError = false;
-    if (editedDescription.length >= MAX_DESCRIPTION_LENGTH) {
-      setErrorDescr(`Details field must be less than ${MAX_DESCRIPTION_LENGTH} characters`);
-      hasDescriptionError = true;
-    }
-    return hasDescriptionError
-  }
-
-  // on Cancel button
-  const handleCancel = () => {
-    setIsEditing(false);
-  }
 
   return(
     <>
