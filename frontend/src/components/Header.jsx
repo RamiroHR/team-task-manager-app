@@ -1,4 +1,9 @@
-export default function Header({ isAuthenticated, onLogout}) {
+import { useAuthContext } from '../context/AuthContext.jsx'
+
+export default function Header() {
+
+  const { isAuthenticated, onLogout } = useAuthContext();
+
   return (
     <div className={`flex justify-between items-center pt-4 mb-4 ${!isAuthenticated? 'max-w-md mx-auto' : ''}`}>
       <h1 className="text-2xl font-bold">Task Manager</h1>

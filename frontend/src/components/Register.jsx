@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getApiUrl } from '../utils/api';
 
-const Register = () => {
+export default function Register() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,7 +22,7 @@ const Register = () => {
 
       if (response.ok) {
         localStorage.setItem('token', data.token);    // Store the token in local storage
-        navigate('/login');                           // Redirect to the home page
+        navigate('/login');                           // Redirect to landing page
       } else {
         setError(data.error || 'Registration failed');
       }
@@ -72,5 +72,3 @@ const Register = () => {
     </div>
   );
 };
-
-export default Register;

@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuthContext } from '../context/AuthContext.jsx';
 import { getApiUrl } from '../utils/api';
 
-const Login = ({ onLogin }) => {
+
+export default function Login() {
+  const { onLogin } = useAuthContext()
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -70,5 +73,3 @@ const Login = ({ onLogin }) => {
     </div>
   );
 };
-
-export default Login;
