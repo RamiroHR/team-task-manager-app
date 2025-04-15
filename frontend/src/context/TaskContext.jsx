@@ -53,14 +53,24 @@ export default function TaskProvider({children}) {
   }, [page, showDiscarded]);
 
 
-  const toggleDiscardedView = () => {
+  // View-Mode operations
+
+  const toggleTrashView = () => {
     setShowDiscarded(!showDiscarded);
     setPage(1);
   }
 
 
+
   // Single-task operations
 
+  const selectTask = (task) => {
+    setSelectedTask(task);
+    setIsEditing(false);
+  }
+
+
+  // Update selected Task (front + back)
   const updateTask = async(taskId, updatedData) => {
     await updateDatabase(taskId, updatedData);
     await fetchTasks();
@@ -89,6 +99,42 @@ export default function TaskProvider({children}) {
   };
 
 
+  // Add new task
+  const addTask = async (title) => {
+    const token = localStorage.getItem('token'); // Get the token from localStorage
+
+    const res = await fetch(getApiUrl('/api/task/new'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`, // Include the token in the headers
+      },
+      body: JSON.stringify({ title }),
+    });
+
+    return res
+  }
+
+
+  // Delete a task, then fetch data
+  const deleteTask = async (id) => {
+    const token = localStorage.getItem('token');
+
+    const response = await fetch(getApiUrl(`/api/task/delete/${id}`), {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete task');
+    }
+
+    await fetchTasks();
+  }
+
+
   const closeTaskDetails = () => {
     setIsEditing(false);
     setSelectedTask(null);
@@ -106,11 +152,13 @@ export default function TaskProvider({children}) {
 
       // functions
       fetchTasks,
-      setPage,
-      setSelectedTask,
-      toggleDiscardedView,
-      setIsEditing,
+      addTask,
       updateTask,
+      deleteTask,
+      selectTask,
+      setPage,
+      setIsEditing,
+      toggleTrashView,
       closeTaskDetails
     }}>
       {children}

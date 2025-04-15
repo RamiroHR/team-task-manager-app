@@ -4,7 +4,7 @@ import PagesToolbar from './PagesToolbar.jsx'
 
 export default function Footer() {
 
-  const { tasks, page, setPage, showDiscarded, toggleDiscardedView } = useTaskContext()
+  const { tasks, page, setPage, showDiscarded, toggleTrashView } = useTaskContext()
 
   const handleNext = async (page) => {
     if (tasks.length === 10) {
@@ -32,7 +32,7 @@ export default function Footer() {
       {/* Trash button */}
       <div className="flex justify-left items-center gap-4">
         <button
-          onClick={toggleDiscardedView}
+          onClick={toggleTrashView}
           className="px-4  h-7 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 flex items-center"
         >
           {showDiscarded ? <FaHome className="mr-2"/> : <FaTrash className="mr-2"/>}
