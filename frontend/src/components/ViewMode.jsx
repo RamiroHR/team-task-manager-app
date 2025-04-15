@@ -1,7 +1,8 @@
 // "See" task details window
-import { useTaskContext } from '../context/TaskContext'
+import React from 'react';
+import { useTaskContext } from '../context/TaskContext';
 
-export default function ViewMode() {
+function ViewMode() {
 
   const { selectedTask, showDiscarded, setIsEditing } = useTaskContext()
   const task = selectedTask;
@@ -55,4 +56,6 @@ export default function ViewMode() {
       )}
     </>
   );
-}
+};
+
+export default React.memo(ViewMode);

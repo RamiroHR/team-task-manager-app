@@ -1,7 +1,8 @@
+import React from 'react'
 import TaskForm from './TaskForm'
 
 
-export default function TaskToolbar() {
+function TaskToolbar() {
 
   return(
     <div className="flex justify-between items-center mb-4">
@@ -10,4 +11,6 @@ export default function TaskToolbar() {
 
     </div>
   );
-}
+};
+
+export default React.memo(TaskToolbar);

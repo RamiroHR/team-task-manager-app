@@ -1,9 +1,10 @@
+import React from 'react'
 import { useTaskContext } from '../context/TaskContext';
 import Modal from './Modal';
 import ViewMode from './ViewMode';
 import EditMode from './EditMode';
 
-const TaskDetails = () => {
+function TaskDetails() {
 
   const { isEditing, closeTaskDetails } = useTaskContext()
 
@@ -18,4 +19,4 @@ const TaskDetails = () => {
   );
 };
 
-export default TaskDetails;
+export default React.memo(TaskDetails);

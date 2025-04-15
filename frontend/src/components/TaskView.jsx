@@ -1,3 +1,4 @@
+import React from 'react'
 import { useTaskContext } from '../context/TaskContext';
 import TaskToolbar from './TaskToolbar';
 import TaskTable from './TaskTable';
@@ -5,7 +6,7 @@ import TaskDetails from './TaskDetails';
 import Footer from './Footer';
 
 
-const TaskView = () => {
+function TaskView() {
 
   const { selectedTask } = useTaskContext()
 
@@ -27,7 +28,6 @@ const TaskView = () => {
 
     </div>
   );
-
 };
 
-export default TaskView;
+export default React.memo(TaskView);

@@ -1,5 +1,6 @@
+import React from 'react'
 
-export default function PagesToolbar({handleNext, handlePrev, page}) {
+function PagesToolbar({handleNext, handlePrev, page}) {
 
   return(
     <div className="flex justify-left items-center gap-4">
@@ -32,3 +33,5 @@ export default function PagesToolbar({handleNext, handlePrev, page}) {
   )
 }
 
+
+export default React.memo(PagesToolbar);

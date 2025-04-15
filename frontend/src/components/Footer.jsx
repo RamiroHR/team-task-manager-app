@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { useTaskContext } from '../context/TaskContext';
 import { FaHome, FaTrash } from 'react-icons/fa';
 import PagesToolbar from './PagesToolbar.jsx'
@@ -6,17 +7,17 @@ export default function Footer() {
 
   const { tasks, page, setPage, showDiscarded, toggleTrashView } = useTaskContext()
 
-  const handleNext = async (page) => {
+  const handleNext = useCallback(async (page) => {
     if (tasks.length === 10) {
       setPage(page+1);
     }
-  }
+  }, [tasks.length, setPage])
 
-  const handlePrev = async (page) => {
+  const handlePrev = useCallback(async (page) => {
     if (page > 1) {
       setPage(page-1);
     }
-  }
+  }, [setPage])
 
 
   return(
