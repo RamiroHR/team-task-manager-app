@@ -135,6 +135,44 @@ export default function TaskProvider({children}) {
   }
 
 
+  // Restore a task from trash
+  const restoreTask = async (id) => {
+    const token = localStorage.getItem('token');
+
+    const response = await fetch(getApiUrl(`/api/task/restore/${id}`), {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to restore task');
+    }
+
+    await fetchTasks();
+  }
+
+
+  // Permanently delete a task from trash
+  const eraseTask = async (id) => {
+    const token = localStorage.getItem('token');
+
+    const response = await fetch(getApiUrl(`/api/task/erase/${id}`), {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to erase task');
+    }
+
+    await fetchTasks();
+  }
+
+
   const closeTaskDetails = () => {
     setIsEditing(false);
     setSelectedTask(null);
@@ -159,7 +197,9 @@ export default function TaskProvider({children}) {
       setPage,
       setIsEditing,
       toggleTrashView,
-      closeTaskDetails
+      closeTaskDetails,
+      restoreTask,
+      eraseTask
     }}>
       {children}
     </TaskContext.Provider>

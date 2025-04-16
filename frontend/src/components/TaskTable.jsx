@@ -4,7 +4,7 @@ import TaskRow from './TaskRow'
 
 
 export default function TaskTable() {
-  const {tasks, selectTask, showDiscarded, deleteTask} = useTaskContext();
+  const {tasks, selectTask, showDiscarded, deleteTask, restoreTask, eraseTask} = useTaskContext();
 
   const handleSee = useCallback((task) => {
     selectTask(task);
@@ -12,12 +12,28 @@ export default function TaskTable() {
 
   const handleDelete = useCallback(async (id) => {
     // confirmation message before deleting
-    if (!window.confirm('Are you sure you want to discard this task?')) {
+    if (!window.confirm('Are you sure you want to move this task to trash?')) {
       return;
     }
     // proceed to delete after confirmation
     await deleteTask(id)
-  }, [deleteTask])
+  }, [deleteTask]);
+
+  const handleRestore = useCallback(async (id) => {
+    try {
+      await restoreTask(id);
+    } catch (error) {
+      console.error('Falied to restore task', error);
+    }
+  },[restoreTask]);
+
+  const handleErase = useCallback(async (id) => {
+    try {
+      await eraseTask(id);
+    } catch (error) {
+      console.error('Falied to erase task', error);
+    }
+  },[eraseTask]);
 
   return(
     <div className="mt-6 overflow-x-auto">
@@ -40,6 +56,8 @@ export default function TaskTable() {
             task={task}
             onSee={handleSee}
             onDelete={handleDelete}
+            onRestore={handleRestore}
+            onErase={handleErase}
             showDiscarded={showDiscarded}
           />
         ))}
