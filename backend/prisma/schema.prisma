@@ -27,7 +27,8 @@ model Task {
   title         String   @default("New Task")
   description   String   @default("")
   completed     Boolean  @default(false)
-  discarded     Boolean  @default(false)
+  discarded     Boolean  @default(false)    // trash bin status (restorable)
+  erased        Boolean  @default(false)    // hard-delete from user perspective
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   userId        Int    // foreign key

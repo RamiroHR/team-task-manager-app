@@ -146,50 +146,6 @@ router.get('/task/:id', async (req, res) => {
 });
 
 
-// DELETE A TASK BY id (soft delete)
-router.put('/task/delete/:id', async (req, res) => {
-  const { id } = req.params;
-  const userId = req.user.id;
-
-  try {
-
-    // verify if task exists and belongs to the user
-    const task = await prisma.task.findUnique({
-      where: { id: Number(id) },
-    });
-
-    if (!task) {
-      return res.status(404).json({
-        error:'Not found',
-        message: 'Task not found'
-      });
-    }
-
-    if (task.userId !== userId) {
-      return res.status(403).json({
-        error: 'Forbidden',
-        message: 'You do not have permission to delete this task'
-      });
-    }
-
-    //Proceed with soft delete
-    const deletedTask = await prisma.task.update({
-      where: { id: Number(id) },
-      data: { discarded: true }
-    });
-
-    return res.json(deletedTask)
-
-  } catch(error) {
-    console.error('Error deleting task:', error)
-    res.status(500).json({
-      error: 'Internal Error server',
-      message: 'Failed to delete task'
-    });
-  }
-})
-
-
 // EDIT A TASK BY id
 router.put('/task/edit/:id', async (req, res) => {
 
@@ -249,6 +205,50 @@ router.put('/task/edit/:id', async (req, res) => {
 });
 
 
+// DELETE A TASK BY id (soft delete)
+router.put('/task/delete/:id', async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+
+    // verify if task exists and belongs to the user
+    const task = await prisma.task.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!task) {
+      return res.status(404).json({
+        error:'Not found',
+        message: 'Task not found'
+      });
+    }
+
+    if (task.userId !== userId) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'You do not have permission to delete this task'
+      });
+    }
+
+    //Proceed with soft delete
+    const deletedTask = await prisma.task.update({
+      where: { id: Number(id) },
+      data: { discarded: true }
+    });
+
+    return res.json(deletedTask)
+
+  } catch(error) {
+    console.error('Error deleting task:', error)
+    res.status(500).json({
+      error: 'Internal Error server',
+      message: 'Failed to delete task'
+    });
+  }
+})
+
+
 // GET DISCARDED TASKS in PAGE p
 router.get('/tasks/discarded/page/:p', async (req, res) => {
   const { p } = req.params;
@@ -260,6 +260,7 @@ router.get('/tasks/discarded/page/:p', async (req, res) => {
       where: {
         userId,
         discarded: true,
+        erased: false
       },
       orderBy: { updatedAt: 'desc'},  // Show most recently discarded first
       skip: (p-1)*pageSize,
@@ -275,5 +276,106 @@ router.get('/tasks/discarded/page/:p', async (req, res) => {
     })
   }
 });
+
+
+// RESTORE A TASK FROM TRASH BIN
+router.put('/task/restore/:id', async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try{
+    // chekc if task exists and belong to user
+    const task = await prisma.task.findUnique({
+      where: { id: Number(id) }
+    });
+
+    if (!task) {
+      return res.status(404).json({
+        error: 'Not found',
+        message: 'Task not found'
+      });
+    }
+
+    if (task.userId !== userId) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'You do not have permission to restore this task'
+      });
+    }
+
+    if (!task.discarded || task.erased) {
+      return res.status(400).json({
+        error: 'Bad request',
+        messsage: 'Task cannot be restored'
+      });
+    }
+
+    //Proceed with restore
+    const restoredTask = await prisma.task.update({
+      where: { id: Number(id) },
+      data: { discarded: false }
+    });
+
+    return res.json(restoredTask);
+
+  } catch (error) {
+    console.error('Error restoring task', error)
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to restore task'
+    });
+  }
+});
+
+
+// PERMANENTLY DELETE A TASK (soft delete from trash bin)
+router.put('/task/erase/:id', async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    // First check if task exists and belongs to user
+    const task = await prisma.task.findUnique({
+      where: { id: Number(id) }
+    });
+
+    if (!task) {
+      return res.status(404).json({
+        error: 'Not found',
+        message: 'Task not found'
+      });
+    }
+
+    if (task.userId !== userId) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'You do not have permission to erase this task'
+      });
+    }
+
+    if (!task.discarded || task.erased) {
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: 'Task cannot be erased'
+      });
+    }
+
+    // Proceed with permanent deletion (soft delete)
+    const erasedTask = await prisma.task.update({
+      where: { id: Number(id) },
+      data: { erased: true }
+    });
+
+    return res.json(erasedTask);
+
+  } catch(error) {
+    console.error('Error erasing task:', error)
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to erase task'
+    });
+  }
+});
+
 
 module.exports = router;
