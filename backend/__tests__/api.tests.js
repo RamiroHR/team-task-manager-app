@@ -58,8 +58,8 @@ describe('Test the api endpoints', () => {
         password: 'testPassword2'
       });
 
-    expect(response.statusCode).toBe(500);
-    expect(response.error).toBeDefined();
+    expect(response.statusCode).toBe(409);
+    expect(response.body.error).toBe('Username already exists');
   })
 
 
@@ -120,44 +120,47 @@ describe('Test the api endpoints', () => {
     expect(response.body.error).toBeDefined();
   })
 
+  // Test Token Verification
+  it('should verify a valid token', async () => {
+    const response = await request(app)
+      .get('/api/auth/verify')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.valid).toBe(true);
+  });
+
+
+  it('should reject invalid token verification', async () => {
+    const response = await request(app)
+      .get('/api/auth/verify')
+      .set('Authorization', `Bearer ${fakeToken}`);
+
+    expect(response.statusCode).toBe(400);
+  });
+
+
 
   // Test POST /api/tasks (Create a new task)
   it('should create a new task', async () => {
     const response = await request(app)
       .post('/api/task/new')
       .set('Authorization', `Bearer ${token}`)
-      .send({ title: 'New Test Task' });
+      .send({
+        title: 'New Test Task',
+        description: 'Test task description'
+      });
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty('id');
     expect(response.body.title).toBe('New Test Task');
+    expect(response.body.description).toBe('Test task description');
     expect(response.body.completed).toBe(false);
 
     taskId = response.body.id;        // Save the task ID & Title for later tests
     taskTitle = response.body.title;
   });
 
-
-  // Test GET /api/tasks (Get all tasks)
-  it('should get a non empty list of tasks', async () => {
-    const response = await request(app)
-      .get('/api/tasks')
-      .set('Authorization', `Bearer ${token}`);
-
-    expect(response.statusCode).toBe(200);
-    expect(Array.isArray(response.body)).toBe(true);
-    expect(response.body.length).toBeGreaterThan(0);
-  })
-
-
-  // Test GET /api/tasks (Get all tasks)
-  it('should NOt access the task list with invalid JWT token', async () => {
-    const response = await request(app)
-      .get('/api/tasks')
-      .set('Authorization', `Bearer ${fakeToken}`);
-
-    expect(response.statusCode).toBe(400); // Bad Request
-  })
 
   // Test GET /api/tasks/page/1 (Get all tasks)
   it('should get task of one page', async () => {
@@ -170,6 +173,59 @@ describe('Test the api endpoints', () => {
     expect(response.body.length).toBeGreaterThan(0);
     expect(response.body.length).toBeLessThanOrEqual(pageSize);
   })
+
+
+  it('should get filtered completed tasks', async () => {
+    // First create a completed task
+    await request(app)
+      .post('/api/task/new')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'Completed Task',
+        completed: true
+      });
+
+    // verify
+    const response = await request(app)
+      .get('/api/tasks/page/1?completionFilter=completed')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    response.body.forEach(task => {
+      expect(task.completed).toBe(true);
+    });
+  });
+
+
+  it('should get filtered uncompleted tasks', async () => {
+    const response = await request(app)
+      .get('/api/tasks/page/1?completionFilter=uncompleted')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    response.body.forEach(task => {
+      expect(task.completed).toBe(false);
+    });
+  });
+
+
+  it('should sort tasks by updatedAt', async () => {
+    const response = await request(app)
+      .get('/api/tasks/page/1?sortField=updatedAt&sortOrder=desc')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+
+    // Verify descending order
+    for(let i = 1; i < response.body.length; i++) {
+      const prevDate = new Date(response.body[i-1].updatedAt);
+      const currDate = new Date(response.body[i].updatedAt);
+      expect(prevDate.getTime()).toBeGreaterThanOrEqual(currDate.getTime());
+    }
+  });
 
 
   // Test GET /api/task/:id (Get a single task by ID)
@@ -194,6 +250,35 @@ describe('Test the api endpoints', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(response.statusCode).toBe(404);   // >>>>>> change to be 404 after handdling errors
+  });
+
+
+  it('should not allow access to another user\'s task', async () => {
+    // Create another user
+    const otherUserResponse = await request(app)
+      .post('/api/auth/register')
+      .send({
+        username: 'otherUser',
+        password: 'otherPassword'
+      });
+
+    // Login as other user
+    const loginResponse = await request(app)
+      .post('/api/auth/login')
+      .send({
+        username: 'otherUser',
+        password: 'otherPassword'
+      });
+
+    const otherUserToken = loginResponse.body.token;
+
+    // Try to access first user's task
+    const response = await request(app)
+      .get(`/api/task/${taskId}`)
+      .set('Authorization', `Bearer ${otherUserToken}`);
+
+    expect(response.statusCode).toBe(403);
+    expect(response.body.error).toBe('Forbidden');
   });
 
 
@@ -268,13 +353,16 @@ describe('Test the api endpoints', () => {
   // Test validation error
   it('should return 400 for invalid input', async () => {
     const response = await request(app)
-      .put(`/task/edit/${taskId}`)
+      .put(`/api/task/edit/${taskId}`) // Fix the path to include /api
       .set('Authorization', `Bearer ${token}`)
-      .send({ title: '', completed: 'not-a-boolean' }); // Invalid data
+      .send({
+        title: '',  // Invalid empty title
+        completed: 'not-a-boolean' // Invalid boolean
+      });
 
-    expect(response.status).toBe(404);   // ----------> change to 400
-    // expect(response.body.error).toBeDefined();
-    // expect(response.body.message).toBe('Task not found');
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBeDefined();
+    expect(response.body.message).toBe('Validation error');
   });
 
 
@@ -321,5 +409,220 @@ describe('Test the api endpoints', () => {
   })
 
 
+  // Test error handling for task creation
+  it('should handle invalid task data during creation', async () => {
+    const response = await request(app)
+      .post('/api/task/new')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        // Missing title, which is required
+        description: 'Test description'
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.error).toBeDefined();
+    expect(response.body.message).toBe('Validation error.');
+  });
+
+
+  // Test sorting with invalid parameters
+  it('should handle invalid sort parameters', async () => {
+    const response = await request(app)
+      .get('/api/tasks/page/1?sortField=invalidField&sortOrder=invalid')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(200); // Should use default sorting
+    expect(Array.isArray(response.body)).toBe(true);
+  });
+
+
+  // Test pagination with invalid page number
+  it('should handle invalid page number', async () => {
+    const response = await request(app)
+      .get('/api/tasks/page/-1') // Invalid page number
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(500);
+    expect(response.body.error).toBeDefined();
+    expect(response.body.message).toBe('Failed to fetch page');
+  });
+
+
+  // Test task update with missing authorization
+  it('should reject task update without authorization', async () => {
+    const response = await request(app)
+      .put(`/api/task/edit/${taskId}`)
+      .send({ title: 'Updated Title' });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body.error).toBe('Access denied. No token provided.');
+  });
+
+
+  // Test task update with invalid task data
+  it('should handle invalid data in task update', async () => {
+    const response = await request(app)
+      .put(`/api/task/edit/${taskId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: '', // Empty title
+        invalidField: 'some value' // Invalid field
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.error).toBeDefined();
+    expect(response.body.message).toBe('Validation error');
+  });
+
+
+  // Test task deletion with missing authorization
+  it('should reject task deletion without authorization', async () => {
+    const response = await request(app)
+      .put(`/api/task/delete/${taskId}`)
+      .send();
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body.error).toBe('Access denied. No token provided.');
+  });
+
+
+  it('should not allow deletion of another user\'s task', async () => {
+    // First create a task with the first user
+    const taskResponse = await request(app)
+      .post('/api/task/new')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'Task to test deletion',
+        description: 'This task will be attempted to be deleted by another user'
+      });
+
+    const taskToDelete = taskResponse.body.id;
+
+    // Create another user
+    const registerResponse = await request(app)
+      .post('/api/auth/register')
+      .send({
+        username: 'delUser2',
+        password: 'password123'
+      });
+
+    // Login as the other user
+    const loginResponse = await request(app)
+      .post('/api/auth/login')
+      .send({
+        username: 'delUser2',
+        password: 'password123'
+      });
+
+    const otherUserToken = loginResponse.body.token;
+
+    // First verify the token is valid
+    const verifyResponse = await request(app)
+      .get('/api/tasks/page/1')
+      .set('Authorization', `Bearer ${otherUserToken}`);
+
+    expect(verifyResponse.statusCode).toBe(200);
+
+    // Now try to delete the task as the other user
+    const deleteResponse = await request(app)
+      .put(`/api/task/delete/${taskToDelete}`)
+      .set('Authorization', `Bearer ${otherUserToken}`);
+
+    expect(deleteResponse.statusCode).toBe(403);
+    expect(deleteResponse.body.error).toBe('Forbidden');
+  });
+
+
+
+  // Test invalid completion filter
+  it('should handle invalid completion filter', async () => {
+    const response = await request(app)
+      .get('/api/tasks/page/1?completionFilter=invalid')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(200); // Should return all tasks without filtering
+    expect(Array.isArray(response.body)).toBe(true);
+  });
+
+
+  // Test discarded tasks operations
+
+  let discardedTaskId;
+
+  beforeAll(async () => {
+    // Create and discard a task
+    const taskResponse = await request(app)
+      .post('/api/task/new')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'Task to be discarded',
+        description: 'This task will be discarded'
+      });
+
+    discardedTaskId = taskResponse.body.id;
+
+    await request(app)
+      .put(`/api/task/delete/${discardedTaskId}`)
+      .set('Authorization', `Bearer ${token}`);
+  });
+
+  it('should get filtered discarded tasks', async () => {
+    const response = await request(app)
+      .get('/api/tasks/discarded/page/1?completionFilter=uncompleted')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    response.body.forEach(task => {
+      expect(task.completed).toBe(false);
+    });
+  });
+
+  // Test auth error handling
+  it('should handle server error during registration', async () => {
+    // Temporarily modify username to trigger unique constraint
+    const response = await request(app)
+      .post('/api/auth/register')
+      .send({
+        username: userName, // Using existing username to trigger error
+        password: 'testPassword'
+      });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.body.error).toBe('Username already exists');
+  });
+
+  it('should handle invalid token format', async () => {
+    const response = await request(app)
+      .get('/api/tasks/page/1')
+      .set('Authorization', 'InvalidTokenFormat');
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.error).toBe('Invalid token.');
+  });
+
+  it('should handle invalid registration data', async () => {
+    const response = await request(app)
+      .post('/api/auth/register')
+      .send({
+        username: '', // Empty username
+        password: 'password123'
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.error).toBeDefined();
+  });
+
+  it('should handle server errors in login', async () => {
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send({
+        username: null, // This should cause a validation error
+        password: 'password123'
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.error).toBeDefined();
+  });
 
 });

@@ -35,6 +35,10 @@ router.post('/register', async (req, res) => {
 
   } catch (error) {
     console.error('Error registering user:', error);
+    // Check if the error is a unique constraint violation (already existent username)
+    if (error.code === 'P2002' && error.meta?.target?.includes('username')) {
+      return res.status(409).json({ error: 'Username already exists' });
+    }
     return res.status(500).json({ error: 'Internal server error' });
   }
 });

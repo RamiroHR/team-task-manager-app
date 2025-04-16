@@ -1,34 +1,27 @@
-import React, { useState } from 'react';
-import { getApiUrl } from '../utils/api';
+import { useState } from 'react';
+import { useTaskContext } from '../context/TaskContext';
 
-const TaskForm = ({ onTaskAdded }) => {
+export default function TaskForm() {
+  const { addTask, fetchTasks } = useTaskContext()
+
   const [title, setTitle] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // prevent the form refreshing the page
-    const token = localStorage.getItem('token'); // Get the token from localStorage
 
     try {
-      // Send a POST request to the backend
-      const res = await fetch(getApiUrl('/api/task/new'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`, // Include the token in the headers
-        },
-        body: JSON.stringify({ title }),
-      });
-
-      const data = await res.json(); // Parse the response as JSON
+      const res = await addTask(title)
+      const data = await res.json();
 
       if (res.ok) {
-        onTaskAdded(data);    // Notify the parent component to update the ui
+        fetchTasks();        // Update parent
         setTitle('');         // Clear the input field
         setError('');         // Remove previous Errors
       } else {
         setError(data.error || 'Invalid task title')
       }
+
     } catch (err) {
       setError('An error ocurred. Please Try again.');
     }
@@ -53,4 +46,3 @@ const TaskForm = ({ onTaskAdded }) => {
   );
 };
 
-export default TaskForm;

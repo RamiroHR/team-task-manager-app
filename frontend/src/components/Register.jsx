@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getApiUrl } from '../utils/api';
 
-const Register = () => {
+export default function Register() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -22,7 +23,7 @@ const Register = () => {
 
       if (response.ok) {
         localStorage.setItem('token', data.token);    // Store the token in local storage
-        navigate('/login');                           // Redirect to the home page
+        navigate('/login');                           // Redirect to landing page
       } else {
         setError(data.error || 'Registration failed');
       }
@@ -50,13 +51,25 @@ const Register = () => {
         </div>
         <div className="mb-4">
           <label className="block text-gray-700">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 border rounded border-gray-900 text-gray-900"
-            required
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-2 border rounded border-gray-900 text-gray-900"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className={`
+                absolute right-2 top-1/2 transform -translate-y-1/2
+                text-gray-400 hover:text-gray-800 focus:outline-none border-none
+              `}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
         </div>
         <button type="submit" className="w-full p-2 bg-green-600 text-white rounded hover:bg-green-600">
           Register
@@ -72,5 +85,3 @@ const Register = () => {
     </div>
   );
 };
-
-export default Register;
