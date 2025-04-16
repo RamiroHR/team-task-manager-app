@@ -109,13 +109,12 @@ export default function TaskProvider({children}) {
 
   // Update selected Task (front + back)
   const updateTask = async(taskId, updatedData) => {
-    await updateDatabase(taskId, updatedData);
+    const response = await updateDatabase(taskId, updatedData);
     await fetchTasks();
 
-    setSelectedTask(prev => ({
-      ...prev,
-      ...updatedData // overwrite the previous task details
-    }));
+    const updatedTask = await response.json();
+
+    setSelectedTask(updatedTask);
 
     setIsEditing(false);
   }
@@ -125,7 +124,7 @@ export default function TaskProvider({children}) {
   const updateDatabase = async (id, updatedData) => {
     const token = localStorage.getItem('token');
 
-    await fetch(getApiUrl(`/api/task/edit/${id}`), {
+    const response = await fetch(getApiUrl(`/api/task/edit/${id}`), {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -133,6 +132,8 @@ export default function TaskProvider({children}) {
       },
       body: JSON.stringify(updatedData),
     });
+
+    return response;
   };
 
 
