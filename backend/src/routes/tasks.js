@@ -48,49 +48,71 @@ router.post('/task/new', async (req, res) => {
 })
 
 
-// GET TOP N MOST RECENT TASKS
-router.get('/tasks', async (req, res) => {
+// // GET TOP N MOST RECENT TASKS
+// router.get('/tasks', async (req, res) => {
 
-  const N = 100;
-  const userId = req.user.id;
+//   const N = 100;
+//   const userId = req.user.id;
 
-  try {
-    const tasks = await prisma.task.findMany({
-      where: {
-        userId,
-        discarded: false,
-      },
-      orderBy: { createdAt: 'asc' },
-      take: N,
-    });
-    return res.json(tasks);
+//   try {
+//     const tasks = await prisma.task.findMany({
+//       where: {
+//         userId,
+//         discarded: false,
+//       },
+//       orderBy: { createdAt: 'asc' },
+//       take: N,
+//     });
+//     return res.json(tasks);
 
-  } catch (error) {
-    console.error('Error fetching tasks:', error);
-    res.status(500).json({
-      error: 'Internal server Error',
-      message: 'Failed to tefch tasks'
-    });
-  }
-});
+//   } catch (error) {
+//     console.error('Error fetching tasks:', error);
+//     res.status(500).json({
+//       error: 'Internal server Error',
+//       message: 'Failed to tefch tasks'
+//     });
+//   }
+// });
 
 
-// GET RECENT TASKS in PAGE p
+// GET TASKS in PAGE p
 router.get('/tasks/page/:p', async (req, res) => {
   const { p } = req.params;
+  const { completionFilter, sortField, sortOrder } = req.query;
   const pageSize = 10;
   const userId = req.user.id;
 
   try {
+
+    //build where clause based on filters
+    const where = {
+      userId,
+      discarded: false,
+    };
+
+    // Add completion filter if specified
+    if (completionFilter === 'completed') {
+      where.completed = true;
+    } else if (completionFilter === 'uncompleted') {
+      where.completed = false;
+    }
+
+    // Build sort order
+    const orderBy = {};
+    if (sortField === 'updatedAt' || sortField === 'createdAt') {
+      orderBy[sortField] = sortOrder?.toLowerCase() === 'desc' ? 'desc' : 'asc';
+    } else {
+      // Default sort
+      orderBy.createdAt = 'asc';
+    }
+
     const tasks = await prisma.task.findMany({
-      where: {
-        userId,
-        discarded: false,
-      },
-      orderBy: { createdAt: 'asc'},
+      where,
+      orderBy,
       skip: (p-1)*pageSize,
       take: pageSize
     });
+
     return res.json(tasks);
 
   } catch (error) {
@@ -252,17 +274,38 @@ router.put('/task/delete/:id', async (req, res) => {
 // GET DISCARDED TASKS in PAGE p
 router.get('/tasks/discarded/page/:p', async (req, res) => {
   const { p } = req.params;
+  const { completionFilter, sortField, sortOrder } = req.query;
   const pageSize = 10;
   const userId = req.user.id;
 
   try {
+
+    //build where clause based on filters
+    const where = {
+      userId,
+      discarded: true,
+      erased: false
+    };
+
+    // Add completion filter if specified
+    if (completionFilter === 'completed') {
+      where.completed = true;
+    } else if (completionFilter === 'uncompleted') {
+      where.completed = false;
+    }
+
+    // Build sort order
+    const orderBy = {};
+    if (sortField === 'updatedAt' || sortField === 'createdAt') {
+      orderBy[sortField] = sortOrder?.toLowerCase() === 'desc' ? 'desc' : 'asc';
+    } else {
+      // By default show most recently discarded first
+      orderBy.updatedAt = 'desc';
+    }
+
     const tasks = await prisma.task.findMany({
-      where: {
-        userId,
-        discarded: true,
-        erased: false
-      },
-      orderBy: { updatedAt: 'desc'},  // Show most recently discarded first
+      where,
+      orderBy,
       skip: (p-1)*pageSize,
       take: pageSize
     });

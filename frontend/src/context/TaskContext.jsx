@@ -27,30 +27,67 @@ export default function TaskProvider({children}) {
   // single task states
   const [selectedTask, setSelectedTask] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // filters related states
+  const [completionFilter, setCompletionFilter] = useState('all'); // 'all', 'completed', 'uncompleted'
+  const [sortField, setSortField] = useState('createdAt'); // 'createdAt', 'updatedAt'
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc', 'desc'
+
+
+  // Update filter handlers to reset page
+  const handleCompletionFilter = (value) => {
+    setPage(1);  // Reset to first page
+    setCompletionFilter(value);
+  };
+
+  const handleSortChange = (field) => {
+    setPage(1);  // Reset to first page
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
 
   // List-related operations
   const fetchTasks = async () => {
-    const token = localStorage.getItem('token');
+    setIsLoading(true);
 
-    // select endpoint based on showDiscarded state
-    const endpoint = showDiscarded ?
-      getApiUrl(`/api/tasks/discarded/page/${page}`) :
-      getApiUrl(`/api/tasks/page/${page}`);
+    try {
+      const token = localStorage.getItem('token');
 
-    const res = await fetch(endpoint, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    const data = await res.json();
-    setTasks(data);
+      // select endpoint based on showDiscarded state
+      const endpoint = showDiscarded ?
+        getApiUrl(`/api/tasks/discarded/page/${page}`) :
+        getApiUrl(`/api/tasks/page/${page}`);
+
+      // Query parameters fr filters
+      const queryParams = new URLSearchParams({
+        completionFilter,
+        sortField,
+        sortOrder
+      }).toString();
+
+      const res = await fetch(`${endpoint}?${queryParams}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      setTasks(data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
 
   useEffect(() => {
     fetchTasks();
-  }, [page, showDiscarded]);
+  }, [page, showDiscarded, completionFilter, sortField, sortOrder]);
 
 
   // View-Mode operations
@@ -187,6 +224,7 @@ export default function TaskProvider({children}) {
       selectedTask,
       showDiscarded,
       isEditing,
+      isLoading,
 
       // functions
       fetchTasks,
@@ -199,7 +237,17 @@ export default function TaskProvider({children}) {
       toggleTrashView,
       closeTaskDetails,
       restoreTask,
-      eraseTask
+      eraseTask,
+
+      // filters related states and functions
+      completionFilter,
+      setCompletionFilter,
+      sortField,
+      setSortField,
+      sortOrder,
+      setSortOrder,
+      handleCompletionFilter,
+      handleSortChange,
     }}>
       {children}
     </TaskContext.Provider>
