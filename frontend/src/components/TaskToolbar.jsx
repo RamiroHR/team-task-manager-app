@@ -29,8 +29,6 @@ function TaskToolbar() {
           value={completionFilter}
           onChange={(e) => handleCompletionFilter(e.target.value)}
           className="px-3 py-1 rounded-md bg-gray-600 text-white text-sm hover:bg-gray-700"
-          // className="px-3 py-1 border rounded-md bg-white text-gray-700 text-sm"
-          // className="w-7 h-7 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
           disable={(showDiscarded || isLoading).toString()}
         >
           <option value="all">All Tasks</option>

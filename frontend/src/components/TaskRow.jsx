@@ -1,19 +1,30 @@
 import React from 'react'
+import { FaTrash } from "react-icons/fa";
+import { BsCheckCircleFill, BsCircle } from "react-icons/bs";
 
 function TaskRow({task, onSee, onDelete, onRestore, onErase, showDiscarded}) {
+
+  const actionButtonStyle = "px-1 py-1 text-sm rounded border border-transparent hover:border-gray-400 hover:bg-gray-600";
+
   return(
-    <li key={task.key} className="flex items-center border-b border-gray-200 py-2">
+    <li key={task.key} className="flex items-center border-b border-gray-200 py-1.5">
 
       {/* ID, Status, Title */}
       <div className="w-10">{task.id}</div>
-      <div className="w-20">{task.completed?'done 🟢' : 'todo ⚫'}</div>
+      <div className="w-20">
+        {task.completed?(
+          <BsCheckCircleFill className="w-4 h-4 text-green-500" />
+        ) : (
+          <BsCircle className="w-4 h-4 text-gray-500" />
+        )}
+      </div>
       <div className="flex-1 truncate break-all">{task.title.slice(0,50)}</div>
 
       {/* Actions */}
       <div className="w-24 flex justify-center space-x-1">
         <button
           onClick={() => onSee(task)}
-          className="px-1 py-1 text-sm text-white rounded hover:border hover:bg-gray-600"
+          className={actionButtonStyle}
           title= "See task"
         >
           👁️
@@ -23,7 +34,7 @@ function TaskRow({task, onSee, onDelete, onRestore, onErase, showDiscarded}) {
           <>
             <button
               onClick={() => onRestore(task.id)}
-              className="px-1 py-1 text-sm text-white rounded hover:border hover:bg-gray-600"
+              className={actionButtonStyle}
               title="Restore task"
             >
               ♻️
@@ -34,7 +45,7 @@ function TaskRow({task, onSee, onDelete, onRestore, onErase, showDiscarded}) {
                   onErase(task.id);
                 }
               }}
-              className="px-1 py-1 text-sm text-white rounded hover:border hover:bg-gray-600"
+              className={actionButtonStyle}
               title="Permanently delete"
             >
               ⛔
@@ -44,10 +55,11 @@ function TaskRow({task, onSee, onDelete, onRestore, onErase, showDiscarded}) {
           // Inside Home view
           <button
             onClick={() => onDelete(task.id)}
-            className="px-1 py-1 text-sm text-white rounded hover:border hover:bg-gray-600"
+            className={actionButtonStyle}
             title="Move to trash"
           >
-            🗑️
+            {/* 🗑️ */}
+            <FaTrash/>
           </button>
         )}
       </div>

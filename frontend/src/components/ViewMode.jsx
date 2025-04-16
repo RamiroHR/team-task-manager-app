@@ -1,6 +1,7 @@
 // "See" task details window
 import React from 'react';
 import { useTaskContext } from '../context/TaskContext';
+import { BsCheckCircleFill, BsCircle } from "react-icons/bs";
 
 function ViewMode() {
 
@@ -19,7 +20,19 @@ function ViewMode() {
       {/* Task Status */}
       <div className="flex items-center gap-2 mb-6">
         <h2 className="text-l font-bold">Status:</h2>
-        <p className="text-gray-400">{task?.completed ? ' 🟢 done' : ' ⚫ todo'}</p>
+        <div className="flex items-center gap-1 text-gray-400">
+          {task?.completed ? (
+            <>
+              <BsCheckCircleFill className="w-4 h-4 text-green-500" />
+              <span>done</span>
+            </>
+          ) : (
+            <>
+              <BsCircle className="w-4 h-4 text-gray-500" />
+              <span>To-do</span>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Task Details */}
