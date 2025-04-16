@@ -19,6 +19,7 @@ model User {
   password  String   // This is the hashed password + salt string
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  tasks     Task[]   // relation field to Task model
 }
 
 model Task {
@@ -29,4 +30,6 @@ model Task {
   discarded     Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  userId        Int    // foreign key
+  user          User     @relation(fields: [userId], references: [id])
 }
