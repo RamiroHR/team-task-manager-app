@@ -26,11 +26,13 @@ router.post('/task/new', async (req, res) => {
 
     // proceed if validation passes
     const { title, description } = value
+    const userId = req.user.id            // from the authenticated request by authenticate midleware
 
     const newTask = await prisma.task.create({
       data: {
         title,
         description,
+        userId,
       }
     });
 
@@ -42,9 +44,7 @@ router.post('/task/new', async (req, res) => {
       error: 'Internal server error',
       message: 'Failed to create task'
     })
-
   }
-
 })
 
 
@@ -52,17 +52,21 @@ router.post('/task/new', async (req, res) => {
 router.get('/tasks', async (req, res) => {
 
   const N = 100;
+  const userId = req.user.id;
 
   try {
     const tasks = await prisma.task.findMany({
-      where: { discarded: false},
+      where: {
+        userId,
+        discarded: false,
+      },
       orderBy: { createdAt: 'asc' },
       take: N,
     });
     return res.json(tasks);
 
-  } catch (err) {
-    console.error('Error fetching tasks:', err);
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
     res.status(500).json({
       error: 'Internal server Error',
       message: 'Failed to tefch tasks'
@@ -75,18 +79,22 @@ router.get('/tasks', async (req, res) => {
 router.get('/tasks/page/:p', async (req, res) => {
   const { p } = req.params;
   const pageSize = 10;
+  const userId = req.user.id;
 
   try {
     const tasks = await prisma.task.findMany({
-      where: { discarded: false},
+      where: {
+        userId,
+        discarded: false,
+      },
       orderBy: { createdAt: 'asc'},
       skip: (p-1)*pageSize,
       take: pageSize
     });
     return res.json(tasks);
 
-  } catch (err) {
-    console.error(`Error fetching page ${p}`, err);
+  } catch (error) {
+    console.error(`Error fetching page ${p}`, error);
     res.status(500).json({
       error: 'Server Error',
       message: 'Failed to fetch page'
@@ -98,61 +106,86 @@ router.get('/tasks/page/:p', async (req, res) => {
 // GET A TASK BY id
 router.get('/task/:id', async (req, res) => {
   const { id } = req.params;
+  const userId = req.user.id;
 
   try {
-    const retrievedTask = await prisma.task.findUnique({
-      where: {
-        id: Number(id),
-        discarded: false
-       },
+    const task = await prisma.task.findUnique({
+      where: { id: Number(id) }
     });
 
-    if (!retrievedTask) {
+    if (!task) {
       return res.status(404).json({
         error: 'Not found',
         message: 'Task not found'
       })
     }
 
-    return res.status(200).json(retrievedTask)
+    if (task.userId !== userId) {
+      return res.status(403).json({
+        error:'Forbidden',
+        message:'You do not have permission to view this task'
+      });
+    }
 
-  } catch (err) {
-    console.error(`Error fetching task:`, err)
+    if (task.discarded) {
+      return res.status(404).json({
+        error: 'Nor found',
+        message: 'Task not found. Task discarded'
+      })
+    }
+
+    return res.status(200).json(task)
+
+  } catch (error) {
+    console.error(`Error fetching task:`, error)
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to fetch task'
     })
   }
+});
 
-})
 
-
-// DELETE A TASK BY id
+// DELETE A TASK BY id (soft delete)
 router.put('/task/delete/:id', async (req, res) => {
   const { id } = req.params;
+  const userId = req.user.id;
 
   try {
+
+    // verify if task exists and belongs to the user
+    const task = await prisma.task.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!task) {
+      return res.status(404).json({
+        error:'Not found',
+        message: 'Task not found'
+      });
+    }
+
+    if (task.userId !== userId) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'You do not have permission to delete this task'
+      });
+    }
+
+    //Proceed with soft delete
     const deletedTask = await prisma.task.update({
       where: { id: Number(id) },
-      data: {discarded: true}
+      data: { discarded: true }
     });
 
     return res.json(deletedTask)
-    // return res.status(204).end();  //sucess but no response body
 
   } catch(error) {
-    if (error.code === 'P2025') {
-      res.status(404).json({
-        error: 'Not found',
-        message: 'Task not found'
-      });
-    } else {
-      console.error('Error deleting task:', error)
-      res.status(500).json({
-        error: 'Internal Error server',
-        message: 'Failed to delete task'
-      });
-    }
+    console.error('Error deleting task:', error)
+    res.status(500).json({
+      error: 'Internal Error server',
+      message: 'Failed to delete task'
+    });
   }
 })
 
@@ -161,6 +194,28 @@ router.put('/task/delete/:id', async (req, res) => {
 router.put('/task/edit/:id', async (req, res) => {
 
   try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    // Check if task exists and belongs to user
+    const existingTask = await prisma.task.findUnique({
+      where: { id: Number(id) }
+    });
+
+    if (!existingTask) {
+      return res.status(404).json({
+        error: 'Not found',
+        message: 'Task not found'
+      });
+    }
+
+    if (existingTask.userId !== userId) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'You do not have permission to edit this task'
+      });
+    }
+
     // validation
     const {error, value} = taskSchema.validate(req.body)
     if (error) {
@@ -171,53 +226,49 @@ router.put('/task/edit/:id', async (req, res) => {
       });
     }
 
-    // proceed if validation passes
-    const { id } = req.params;
-    const { title, description, completed } = req.body;
-
+    // proceed with update
+    const { title, description, completed } = value;
     const updatedTask = await prisma.task.update({
-      where: {id: Number(id) },
+      where: { id: Number(id) },
       data: {
         title,
         description,
         completed
-      },
+      }
     });
 
     return res.json(updatedTask)
 
   } catch (error) {
-    if (error.code === 'P2025') { // Prisma not found error
-      res.status(404).json({
-        error: 'Not found',
-        message: 'Task not found'
-      });
-    } else {
-      console.error('Error updating task:', error);
-      res.status(500).json({
-        error: 'Internal server error',
-        message: 'Failed to update task'
-      });
-    }
+    console.error('Error updating task:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to update task'
+    });
   }
-})
+});
+
 
 // GET DISCARDED TASKS in PAGE p
 router.get('/tasks/discarded/page/:p', async (req, res) => {
   const { p } = req.params;
   const pageSize = 10;
+  const userId = req.user.id;
 
   try {
     const tasks = await prisma.task.findMany({
-      where: { discarded: true },     // find discarded tasks
+      where: {
+        userId,
+        discarded: true,
+      },
       orderBy: { updatedAt: 'desc'},  // Show most recently discarded first
       skip: (p-1)*pageSize,
       take: pageSize
     });
     return res.json(tasks);
 
-  } catch (err) {
-    console.error(`Error fetching discarded tasks page ${p}`, err);
+  } catch (error) {
+    console.error(`Error fetching discarded tasks page ${p}`, error);
     res.status(500).json({
       error: 'Server Error',
       message: 'Failed to fetch discarded tasks'

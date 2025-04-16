@@ -1,4 +1,4 @@
-const { verifyToken } = require('../utils/jwt');
+const { verifyToken } = require('../utils/jwt.js');
 
 const authenticate = (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -9,7 +9,7 @@ const authenticate = (req, res, next) => {
 
   try {
     const decoded = verifyToken(token);
-    req.userId = decoded.userId;
+    req.user = { id: decoded.userId };
     next();
   } catch (error) {
     return res.status(400).json({ error: 'Invalid token.' });   // e.g.: if token is expired
