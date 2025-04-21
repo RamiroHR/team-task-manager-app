@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext, useMemo} from 'react';
 import { getApiUrl } from '../utils/api';
 
 // create context
@@ -59,8 +59,17 @@ export default function AuthProvider({children}) {
     setIsAuthenticated(false);
   };
 
+
+  // 4- memoize the context values
+  const contextValues = useMemo(() => ({
+    isAuthenticated,
+    isLoading,
+    onLogin,
+    onLogout
+  }), [isAuthenticated, isLoading])
+
   return (
-    <AuthContext.Provider value={ {isAuthenticated, isLoading, onLogin, onLogout} }>
+    <AuthContext.Provider value={ contextValues }>
       {children}
     </AuthContext.Provider>
   );

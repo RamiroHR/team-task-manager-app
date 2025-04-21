@@ -1,5 +1,4 @@
-import { createContext, useContext } from 'react';
-import { useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { getApiUrl } from '../utils/api';
 
 // create context (private)
@@ -41,20 +40,19 @@ export default function TaskProvider({children}) {
     setCompletionFilter(value);
   };
 
-  const handleSortChange = (field) => {
-    setPage(1);  // Reset to first page
+  const handleSortChange = useCallback((field) => {
+    setPage(1);
     if (sortField === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
       setSortOrder('asc');
     }
-  };
+  }, [sortField, sortOrder]);
 
   // List-related operations
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     setIsLoading(true);
-
     try {
       const token = localStorage.getItem('token');
 
@@ -71,9 +69,7 @@ export default function TaskProvider({children}) {
       }).toString();
 
       const res = await fetch(`${endpoint}?${queryParams}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       setTasks(data);
@@ -82,20 +78,20 @@ export default function TaskProvider({children}) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [page, showDiscarded, completionFilter, sortField, sortOrder]);
 
 
   useEffect(() => {
     fetchTasks();
-  }, [page, showDiscarded, completionFilter, sortField, sortOrder]);
+  }, [page, showDiscarded, completionFilter, sortField, sortOrder, fetchTasks]);
 
 
   // View-Mode operations
 
-  const toggleTrashView = () => {
+  const toggleTrashView = useCallback(() => {
     setShowDiscarded(!showDiscarded);
     setPage(1);
-  }
+  }, [showDiscarded]);
 
 
 
@@ -108,16 +104,13 @@ export default function TaskProvider({children}) {
 
 
   // Update selected Task (front + back)
-  const updateTask = async(taskId, updatedData) => {
+  const updateTask = useCallback(async (taskId, updatedData) => {
     const response = await updateDatabase(taskId, updatedData);
     await fetchTasks();
-
     const updatedTask = await response.json();
-
     setSelectedTask(updatedTask);
-
     setIsEditing(false);
-  }
+  }, [fetchTasks]);
 
 
   // Update DataBase
@@ -155,14 +148,11 @@ export default function TaskProvider({children}) {
 
 
   // Delete a task, then fetch data
-  const deleteTask = async (id) => {
+  const deleteTask = useCallback(async (id) => {
     const token = localStorage.getItem('token');
-
     const response = await fetch(getApiUrl(`/api/task/delete/${id}`), {
       method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      }
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     if (!response.ok) {
@@ -170,18 +160,15 @@ export default function TaskProvider({children}) {
     }
 
     await fetchTasks();
-  }
+  }, [fetchTasks]);
 
 
   // Restore a task from trash
-  const restoreTask = async (id) => {
+  const restoreTask = useCallback(async (id) => {
     const token = localStorage.getItem('token');
-
     const response = await fetch(getApiUrl(`/api/task/restore/${id}`), {
       method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      }
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     if (!response.ok) {
@@ -189,18 +176,15 @@ export default function TaskProvider({children}) {
     }
 
     await fetchTasks();
-  }
+  }, [fetchTasks]);
 
 
   // Permanently delete a task from trash
-  const eraseTask = async (id) => {
+  const eraseTask = useCallback(async (id) => {
     const token = localStorage.getItem('token');
-
     const response = await fetch(getApiUrl(`/api/task/erase/${id}`), {
       method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      }
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     if (!response.ok) {
@@ -208,7 +192,7 @@ export default function TaskProvider({children}) {
     }
 
     await fetchTasks();
-  }
+  }, [fetchTasks]);
 
 
   const closeTaskDetails = () => {
@@ -217,39 +201,62 @@ export default function TaskProvider({children}) {
   };
 
 
+  // memoized context values
+  const contextValues = useMemo(() => ({
+    // states
+    tasks,
+    page,
+    selectedTask,
+    showDiscarded,
+    isEditing,
+    isLoading,
+
+    // functions
+    fetchTasks,
+    addTask,
+    updateTask,
+    deleteTask,
+    selectTask,
+    setPage,
+    setIsEditing,
+    toggleTrashView,
+    closeTaskDetails,
+    restoreTask,
+    eraseTask,
+
+    // filters related states and functions
+    completionFilter,
+    setCompletionFilter,
+    sortField,
+    setSortField,
+    sortOrder,
+    setSortOrder,
+    handleCompletionFilter,
+    handleSortChange
+  }), [
+    // State values
+    tasks,
+    page,
+    selectedTask,
+    showDiscarded,
+    isEditing,
+    isLoading,
+    completionFilter,
+    sortField,
+    sortOrder,
+    // Memoized functions
+    fetchTasks,
+    deleteTask,
+    eraseTask,
+    restoreTask,
+    toggleTrashView,
+    updateTask,
+    handleSortChange
+  ]);
+
+
   return (
-    <TaskContext.Provider value={{
-      // states
-      tasks,
-      page,
-      selectedTask,
-      showDiscarded,
-      isEditing,
-      isLoading,
-
-      // functions
-      fetchTasks,
-      addTask,
-      updateTask,
-      deleteTask,
-      selectTask,
-      setPage,
-      setIsEditing,
-      toggleTrashView,
-      closeTaskDetails,
-      restoreTask,
-      eraseTask,
-
-      // filters related states and functions
-      completionFilter,
-      setCompletionFilter,
-      sortField,
-      setSortField,
-      sortOrder,
-      setSortOrder,
-      handleCompletionFilter,
-      handleSortChange,
-    }}>
+    <TaskContext.Provider value={{ contextValues }}>
       {children}
     </TaskContext.Provider>
   );
