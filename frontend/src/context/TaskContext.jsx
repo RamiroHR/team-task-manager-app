@@ -256,7 +256,7 @@ export default function TaskProvider({children}) {
 
 
   return (
-    <TaskContext.Provider value={{ contextValues }}>
+    <TaskContext.Provider value={contextValues}>
       {children}
     </TaskContext.Provider>
   );
