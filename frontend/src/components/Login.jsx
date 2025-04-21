@@ -49,6 +49,7 @@ export default function Login() {
             onChange={(e) => setUsername(e.target.value)}
             className="w-full p-2 border rounded"
             required
+            autoComplete="username"
           />
         </div>
         <div className="mb-4">
@@ -60,6 +61,7 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full p-2 border rounded"
               required
+              autoComplete="current-password"
             />
             <button
               type="button"

@@ -47,6 +47,7 @@ export default function Register() {
             onChange={(e) => setUsername(e.target.value)}
             className="w-full p-2 border rounded border-gray-900 text-gray-900"
             required
+            autoComplete="username"
           />
         </div>
         <div className="mb-4">
@@ -58,6 +59,7 @@ export default function Register() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full p-2 border rounded border-gray-900 text-gray-900"
               required
+              autoComplete="new-password"
             />
             <button
               type="button"
