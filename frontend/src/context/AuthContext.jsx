@@ -25,36 +25,27 @@ export default function AuthProvider({children}) {
   // 2- side effects logic
   useEffect(() => {
     const verifyToken = async () => {
-
       // await new Promise(resolve => setTimeout(resolve, 2000));  // to test the spinner only
-
       const token = localStorage.getItem('token');
       if (token) {
         try {
           const response = await fetch(getApiUrl('/api/auth/verify'), {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           });
 
           if (response.ok) {
             setIsAuthenticated(true);
-          } else {
-            localStorage.removeItem('token');
-            setIsAuthenticated(false);
+            return;
           }
-
         } catch (error) {
-          localStorage.removeItem('token');
-          setIsAuthenticated(false);
+          console.error('Error verifying authentication token', error);
         }
-      } else {
-        setIsAuthenticated(false);
       }
-      setIsLoading(false); // Set loading to false when verification is complete
+      localStorage.removeItem('token');
+      setIsAuthenticated(false);
     };
 
-    verifyToken();
+    verifyToken().then(() => setIsLoading(false));  // Set loading to false until verification is complete
   }, []);
 
 
