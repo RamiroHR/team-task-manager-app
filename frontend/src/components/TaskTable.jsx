@@ -50,7 +50,7 @@ export default function TaskTable() {
 
       {/* Task List */}
       <ul>
-        {tasks.map((task) => (
+        {tasks?.map((task) => (
           <TaskRow
             key={task.id}
             task={task}

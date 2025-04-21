@@ -8,10 +8,10 @@ export default function Footer() {
   const { tasks, page, setPage, showDiscarded, toggleTrashView } = useTaskContext()
 
   const handleNext = useCallback(async (page) => {
-    if (tasks.length === 10) {
+    if (tasks?.length === 10) {
       setPage(page+1);
     }
-  }, [tasks.length, setPage])
+  }, [tasks?.length, setPage])
 
   const handlePrev = useCallback(async (page) => {
     if (page > 1) {
